@@ -1,6 +1,6 @@
 /**
  * MetaWiki Minimalist Discord Authentication Controller
- * Controls live Discord OAuth2 redirection, nav button username display with profile avatar,
+ * Controls live Discord OAuth2 redirection, embossed avatar display in menu area,
  * and member profile modal triggers.
  */
 
@@ -55,9 +55,9 @@
 
     if (session) {
       navBtn.innerHTML = `
-        <span style="display: inline-flex; align-items: center; gap: 0.55rem;">
-          <img src="${session.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);" alt="Profile Picture">
-          <span style="color: #ffffff; font-weight: 800; font-size: 0.9rem;">${session.username}</span>
+        <span style="display: inline-flex; align-items: center; gap: 0.6rem;">
+          <img src="${session.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.8), 0 3px 8px rgba(0, 0, 0, 0.7);" alt="Profile Picture">
+          <span style="color: #ffffff; font-weight: 800; font-size: 0.92rem; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${session.username}</span>
         </span>
       `;
       navBtn.title = `Logged in as ${session.fullHandle} — Click to open Member Profile`;

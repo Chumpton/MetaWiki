@@ -1,7 +1,7 @@
 /**
  * MetaWiki - Clean Member Profile Modal Component
- * Displays authentic Discord user details, profile avatar, 1-click Discord Guild server join link,
- * and high-visibility bio editor (Leveling up and EXP progress removed).
+ * Displays authentic Discord user details, embossed profile avatar (yellow ring removed, larger 68px size),
+ * 1-click Discord Guild server join link, and high-visibility bio editor.
  */
 
 (function (window) {
@@ -19,11 +19,11 @@
           
           <!-- MODAL HEADER -->
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.3rem;">
-            <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <img id="profileModalAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #fbbf24; box-shadow: 0 0 14px rgba(251, 191, 36, 0.35);" alt="Discord Profile Picture">
+            <div style="display: flex; align-items: center; gap: 0.9rem;">
+              <img id="profileModalAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.22); box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.25), 0 8px 24px rgba(0, 0, 0, 0.75);" alt="Discord Profile Picture">
               <div>
                 <div style="display: flex; align-items: center; gap: 0.45rem;">
-                  <h3 id="profileModalUsername" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; margin: 0; letter-spacing: -0.01em;">Discord Member</h3>
+                  <h3 id="profileModalUsername" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; margin: 0; letter-spacing: -0.01em;">Discord Member</h3>
                   <span style="font-size: 0.72rem; color: #4ade80; background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.35); padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.2rem;"><i class="ph ph-check-circle"></i> Verified</span>
                 </div>
                 <div id="profileModalHandle" style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; font-weight: 500;">@discord</div>

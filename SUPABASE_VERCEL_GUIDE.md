@@ -1,65 +1,55 @@
-# Step-by-Step Guidance: Supabase Backend & Vercel Deployment
+# MetaWiki Supabase & Vercel Production Integration Guide
 
-This guide provides step-by-step instructions for attaching a real **Supabase Authentication & Database backend** and deploying to **Vercel**.
-
----
-
-## Step 1: Setting Up Supabase (Database & Authentication)
-
-1. **Create a Supabase Project**:
-   - Go to [supabase.com](https://supabase.com) and create a free project.
-   - Note down your **Project URL** (e.g. `https://xyzcompany.supabase.co`) and **Anon Public Key** (e.g. `eyJhbGciOi...`).
-
-2. **Configure Discord OAuth in Supabase**:
-   - In your Supabase Dashboard, navigate to **Authentication** $\rightarrow$ **Providers** $\rightarrow$ **Discord**.
-   - Enable Discord authentication.
-   - Copy the **Callback URL** provided by Supabase (e.g. `https://xyzcompany.supabase.co/auth/v1/callback`).
-   - Go to the [Discord Developer Portal](https://discord.com/developers/applications), select your App $\rightarrow$ **OAuth2**, and add the Supabase Callback URL to your Redirect URIs.
-   - Paste your Discord **Client ID** and **Client Secret** into the Supabase Discord provider configuration.
-
-3. **Initialize Supabase in MetaWiki**:
-   Add the following snippet in your client configuration or environment variables:
-   ```javascript
-   const SUPABASE_URL = "https://your-project.supabase.co";
-   const SUPABASE_ANON_KEY = "your-anon-key";
-   
-   // Attach Supabase Provider to MetaWiki Auth
-   window.METAWIKI_AUTH.initSupabase(SUPABASE_URL, SUPABASE_ANON_KEY);
-   ```
+This guide reflects your active Supabase project and Vercel deployment link.
 
 ---
 
-## Step 2: Deploying to Vercel (Serverless Functions)
+## Active Infrastructure Credentials
 
-1. **Environment Variables on Vercel**:
-   In your Vercel Project Settings $\rightarrow$ **Environment Variables**, add:
-   ```env
-   DISCORD_CLIENT_ID="your_discord_client_id"
-   DISCORD_CLIENT_SECRET="your_discord_client_secret"
-   DISCORD_BOT_TOKEN="Bot your_bot_token"
-   TARGET_GUILD_ID="987654321098765432"
-   NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-   NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-   ```
-
-2. **Serverless API Route (`api/auth/discord/verify-guild.js`)**:
-   Vercel handles serverless functions automatically inside the `/api` directory.
-   The `/api/auth/discord/verify-guild.js` route queries Discord's Bot API to verify guild membership before issuing session tokens.
-
-3. **Deploying Command**:
-   ```bash
-   npx vercel
-   ```
+- **Supabase Project URL**: `https://qcqbinlijrzzuvrseyii.supabase.co`
+- **Supabase Auth Callback URL**: `https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/callback`
+- **Vercel Project Dashboard**: `https://vercel.com/chumptons-projects/meta-wiki`
 
 ---
 
-## Step 3: Local & Automated Testing Commands
+## 1. Discord OAuth Setup in Discord Developer Portal
 
-- **Run Automated Auth & Session Test Suite**:
-  ```bash
-  node scripts/test_auth_real.js
-  ```
-- **Run Discord-Gated Site Test Suite**:
-  ```bash
-  npm run test:e2e
-  ```
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
+2. Select your Application $\rightarrow$ **OAuth2** $\rightarrow$ **Redirects**.
+3. Add your exact Supabase Callback URL:
+   ```
+   https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/callback
+   ```
+4. Copy your **Client ID** and **Client Secret**.
+
+---
+
+## 2. Supabase Provider Configuration
+
+1. In your [Supabase Dashboard](https://supabase.com/dashboard/project/qcqbinlijrzzuvrseyii), navigate to **Authentication** $\rightarrow$ **Providers** $\rightarrow$ **Discord**.
+2. Enable Discord Authentication.
+3. Enter your Discord **Client ID** and **Client Secret**.
+4. Save the configuration.
+
+---
+
+## 3. Vercel Environment Variables Configuration
+
+Navigate to your Vercel Dashboard at [https://vercel.com/chumptons-projects/meta-wiki](https://vercel.com/chumptons-projects/meta-wiki) $\rightarrow$ **Settings** $\rightarrow$ **Environment Variables**, and add:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL="https://qcqbinlijrzzuvrseyii.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+DISCORD_CLIENT_ID="your_discord_client_id"
+DISCORD_CLIENT_SECRET="your_discord_client_secret"
+TARGET_GUILD_ID="987654321098765432"
+```
+
+---
+
+## 4. Local & Automated Test Runner
+
+Run the automated test runner to auto-check authentication states anytime:
+```bash
+node scripts/test_auth_real.js
+```

@@ -21,26 +21,29 @@
   }
 
   function forceScrollTop() {
-    // Disable smooth scrolling temporarily to prevent layout clamping bugs
-    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
-    document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+    if (document.documentElement && document.documentElement.style) {
+      document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
+    }
+    if (document.body && document.body.style) {
+      document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+    }
 
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
 
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
     });
 
     setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      document.documentElement.style.removeProperty('scroll-behavior');
-      document.body.style.removeProperty('scroll-behavior');
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      if (document.documentElement && document.documentElement.style) document.documentElement.style.removeProperty('scroll-behavior');
+      if (document.body && document.body.style) document.body.style.removeProperty('scroll-behavior');
     }, 80);
   }
 
@@ -59,7 +62,9 @@
     if (forumsView) forumsView.style.display = targetView === 'forums' ? 'block' : 'none';
     if (articleView) articleView.style.display = targetView === 'article' ? 'block' : 'none';
 
-    document.body.classList.toggle('article-view-active', targetView === 'article');
+    if (document.body && document.body.classList) {
+      document.body.classList.toggle('article-view-active', targetView === 'article');
+    }
 
     const globalNav = document.getElementById('mwGlobalNav');
     if (globalNav) {

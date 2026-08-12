@@ -3,7 +3,7 @@
  * Initializes Router, Views, Components, Services, Utilities, and Global Event Delegation.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initMetaWikiApp() {
   'use strict';
 
   // 1. Global Application State Initialization
@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 2. Set Active Theme Attribute
-  document.documentElement.setAttribute('data-theme', window.state.theme);
+  if (document.documentElement) {
+    document.documentElement.setAttribute('data-theme', window.state.theme);
+  }
 
   // 2b. Initialize Dimension Viewer Controls & Preview Engine
   if (typeof window.initDimensionViewer === 'function') {
@@ -111,4 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   console.log('✨ MetaWiki initialized successfully via main.js');
-});
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMetaWikiApp);
+  } else {
+    initMetaWikiApp();
+  }
+}

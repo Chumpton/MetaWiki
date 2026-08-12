@@ -283,40 +283,110 @@
   }
 
   function bindHeroEvents() {
+    const navHomeBtn = document.getElementById('navHomeBtn');
+    const navGuidesBtn = document.getElementById('navGuidesBtn');
+    const navForumsBtn = document.getElementById('navForumsBtn');
+    const heroRandomBtn = document.getElementById('heroRandomBtn');
+    const navDiscordBtn = document.getElementById('navDiscordBtn');
+
     const heroFoolCard = document.getElementById('heroFoolCard');
     const heroHermeticCard = document.getElementById('heroHermeticCard');
     const heroJungCard = document.getElementById('heroJungCard');
-    const heroRandomBtn = document.getElementById('heroRandomBtn');
     const articleRandomBtn = document.getElementById('articleRandomBtn');
     const heroSpatialMapBtn = document.getElementById('heroSpatialMapBtn');
     const closeSpatialMapBtn = document.getElementById('closeSpatialMapBtn');
     const brandLogo = document.getElementById('mwBrandLogo');
 
-    if (heroFoolCard) heroFoolCard.addEventListener('click', (e) => { e.preventDefault(); loadArticle('fool-archetype'); });
-    if (heroHermeticCard) heroHermeticCard.addEventListener('click', (e) => { e.preventDefault(); loadArticle('kybalion-seven-principles'); });
-    if (heroJungCard) heroJungCard.addEventListener('click', (e) => { e.preventDefault(); loadArticle('jungian-archetypes-shadow'); });
-
-    if (heroRandomBtn) heroRandomBtn.addEventListener('click', (e) => { e.preventDefault(); loadRandomArticle(); });
-    if (articleRandomBtn) articleRandomBtn.addEventListener('click', (e) => { e.preventDefault(); loadRandomArticle(); });
-
-    if (heroSpatialMapBtn) heroSpatialMapBtn.addEventListener('click', (e) => { e.preventDefault(); showSpatialMapView(); });
-    if (closeSpatialMapBtn) closeSpatialMapBtn.addEventListener('click', (e) => { e.preventDefault(); showPortalView(); });
-
-    if (brandLogo) {
-      brandLogo.addEventListener('click', (e) => {
+    if (navHomeBtn) {
+      navHomeBtn.onclick = (e) => {
         e.preventDefault();
         showPortalView();
-      });
+        updateNavActiveState('navHomeBtn');
+      };
+    }
+
+    if (navGuidesBtn) {
+      navGuidesBtn.onclick = (e) => {
+        e.preventDefault();
+        showPortalView();
+        updateNavActiveState('navGuidesBtn');
+        setTimeout(() => {
+          const guidesEl = document.getElementById('hawkinsGuideSection') || document.getElementById('guidesSection');
+          if (guidesEl) guidesEl.scrollIntoView({ behavior: 'smooth' });
+        }, 80);
+      };
+    }
+
+    if (navForumsBtn) {
+      navForumsBtn.onclick = (e) => {
+        e.preventDefault();
+        showForumsView();
+        updateNavActiveState('navForumsBtn');
+      };
+    }
+
+    if (heroRandomBtn) {
+      heroRandomBtn.onclick = (e) => {
+        e.preventDefault();
+        loadRandomArticle();
+      };
+    }
+
+    if (navDiscordBtn) {
+      navDiscordBtn.onclick = (e) => {
+        e.preventDefault();
+        const auth = window.METAWIKI_AUTH;
+        const session = auth ? auth.getSession() : null;
+        if (session) {
+          if (typeof window.openMemberProfileModal === 'function') window.openMemberProfileModal();
+        } else {
+          if (window.METAWIKI_DISCORD_BACKEND && typeof window.METAWIKI_DISCORD_BACKEND.openModal === 'function') {
+            window.METAWIKI_DISCORD_BACKEND.openModal();
+          } else {
+            const modal = document.getElementById('discordLoginModal');
+            if (modal) modal.style.display = 'flex';
+          }
+        }
+      };
+    }
+
+    if (heroFoolCard) heroFoolCard.onclick = (e) => { e.preventDefault(); loadArticle('fool-archetype'); };
+    if (heroHermeticCard) heroHermeticCard.onclick = (e) => { e.preventDefault(); loadArticle('kybalion-seven-principles'); };
+    if (heroJungCard) heroJungCard.onclick = (e) => { e.preventDefault(); loadArticle('jungian-archetypes-shadow'); };
+
+    if (articleRandomBtn) articleRandomBtn.onclick = (e) => { e.preventDefault(); loadRandomArticle(); };
+
+    if (heroSpatialMapBtn) heroSpatialMapBtn.onclick = (e) => { e.preventDefault(); showSpatialMapView(); };
+    if (closeSpatialMapBtn) closeSpatialMapBtn.onclick = (e) => { e.preventDefault(); showPortalView(); };
+
+    if (brandLogo) {
+      brandLogo.onclick = (e) => {
+        e.preventDefault();
+        showPortalView();
+      };
     }
 
     const articleHomeLink = document.getElementById('articleHomeLink');
-    if (articleHomeLink) articleHomeLink.addEventListener('click', (e) => { e.preventDefault(); showPortalView(); });
+    if (articleHomeLink) articleHomeLink.onclick = (e) => { e.preventDefault(); showPortalView(); };
 
     const articleGuidesLink = document.getElementById('articleGuidesLink');
-    if (articleGuidesLink) articleGuidesLink.addEventListener('click', (e) => { e.preventDefault(); showPortalView(); });
+    if (articleGuidesLink) articleGuidesLink.onclick = (e) => { e.preventDefault(); showPortalView(); };
 
     const articleForumsLink = document.getElementById('articleForumsLink');
-    if (articleForumsLink) articleForumsLink.addEventListener('click', (e) => { e.preventDefault(); showForumsView(); });
+    if (articleForumsLink) articleForumsLink.onclick = (e) => { e.preventDefault(); showForumsView(); };
+  }
+
+  function initRouterEvents() {
+    bindUniversalClickDelegation();
+    bindHeroEvents();
+  }
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initRouterEvents);
+    } else {
+      initRouterEvents();
+    }
   }
 
   // Export Router API

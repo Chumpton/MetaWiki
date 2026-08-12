@@ -136,7 +136,19 @@
         const stored = localStorage.getItem('metawiki_chat_channels');
         if (stored) {
           const parsed = JSON.parse(stored);
-          return parsed[activeChannel] || defaultMessagesByChannel[activeChannel] || [];
+          let msgs = parsed[activeChannel] || [];
+          // Filter out all legacy mock profiles
+          msgs = msgs.filter(m => 
+            !m.author.includes('EgoDissolver') && 
+            !m.author.includes('Sophia_Lover') && 
+            !m.author.includes('CalibrationAdept') && 
+            !m.author.includes('KybalionInitiate') && 
+            !m.author.includes('GnosticAlchemist') && 
+            !m.author.includes('QuantumVedantin') && 
+            !m.author.includes('JungianAnalyst') &&
+            !m.author.includes('GnosticSeeker')
+          );
+          if (msgs.length > 0) return msgs;
         }
       } catch (e) {}
       return defaultMessagesByChannel[activeChannel] || [];

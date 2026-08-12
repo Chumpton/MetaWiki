@@ -139,10 +139,13 @@
     ensureRedditThreadModalExists();
 
     const topics = getTopicsList();
-    const topic = topics.find(t => t.id === topicId);
+    let topic = topics.find(t => String(t.id) === String(topicId));
+    if (!topic) {
+      topic = topics[0];
+    }
     if (!topic) return;
 
-    activeThreadTopicId = topicId;
+    activeThreadTopicId = topic.id;
 
     const modal = document.getElementById('forumThreadModal');
     const title = document.getElementById('threadTitle');
@@ -164,12 +167,16 @@
     if (authorAvatar) authorAvatar.src = topic.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
     if (authorName) authorName.textContent = `u/${topic.author || 'Campton'}`;
     if (body) body.textContent = topic.body;
-    if (upvotesCount) upvotesCount.textContent = topic.upvotes || 1;
+
+    let storedVotes = {};
+    try { storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {}; } catch(e) {}
+    const userVote = storedVotes[topic.id] || 0;
+    if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + userVote;
 
     // Fetch comments from Supabase if available
-    if (window.METAWIKI_FORUM_SERVICE && String(topicId).includes('-')) {
+    if (window.METAWIKI_FORUM_SERVICE && String(topic.id).includes('-')) {
       try {
-        const supaComments = await window.METAWIKI_FORUM_SERVICE.fetchComments(topicId);
+        const supaComments = await window.METAWIKI_FORUM_SERVICE.fetchComments(topic.id);
         if (supaComments && supaComments.length > 0) {
           topic.repliesList = supaComments;
         }
@@ -403,7 +410,7 @@
       const downvotedClass = userVote === -1 ? 'downvoted' : '';
 
       return `
-        <div class="forum-topic-card" data-id="${t.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s;">
+        <div class="forum-topic-card" data-id="${t.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s; cursor: pointer;">
           <div class="forum-vote-column">
             <button class="vote-btn vote-up ${upvotedClass}" data-id="${t.id}" title="Upvote Topic">
               <i class="ph ph-caret-up-bold"></i>
@@ -434,6 +441,35 @@
         </div>
       `;
     }).join('');
+
+    // Vote button handlers
+    list.querySelectorAll('.vote-up').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.getAttribute('data-id');
+        const topic = getTopicsList().find(t => String(t.id) === String(topicId));
+        if (topic) {
+          const currentVote = storedVotes[topicId] || 0;
+          storedVotes[topicId] = currentVote === 1 ? 0 : 1;
+          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
+          renderForums();
+        }
+      });
+    });
+
+    list.querySelectorAll('.vote-down').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const topicId = btn.getAttribute('data-id');
+        const topic = getTopicsList().find(t => String(t.id) === String(topicId));
+        if (topic) {
+          const currentVote = storedVotes[topicId] || 0;
+          storedVotes[topicId] = currentVote === -1 ? 0 : -1;
+          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
+          renderForums();
+        }
+      });
+    });
 
     // Card click event -> open thread modal
     list.querySelectorAll('.forum-topic-card').forEach(card => {

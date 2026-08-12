@@ -303,7 +303,8 @@
       shareBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const url = window.location.origin + window.location.pathname + '#forum-' + activeThreadTopicId;
+        const origin = (window.location.origin && window.location.origin !== 'null' && window.location.origin !== 'file://') ? window.location.origin : '';
+        const url = origin + window.location.pathname + '#forum-' + activeThreadTopicId;
         if (navigator.clipboard) {
           navigator.clipboard.writeText(url);
           shareBtn.innerHTML = `<i class="ph ph-check" style="color: #4ade80;"></i> Link Copied!`;

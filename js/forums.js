@@ -29,6 +29,11 @@
     };
   }
 
+  function getUpvoteIconSvg(isVoted) {
+    const fill = isVoted ? '#ffffff' : 'none';
+    return `<svg class="upvote-arrow-svg" width="14" height="14" viewBox="0 0 24 24" fill="${fill}" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; flex-shrink: 0; transition: all 0.2s ease;"><path d="M12 3l-8 9h5v9h6v-9h5L12 3z"/></svg>`;
+  }
+
   function cleanCategoryName(cat) {
     if (!cat) return 'Metaphysical Debate';
     return String(cat).replace(/^r\//i, '').trim();
@@ -81,8 +86,8 @@
             <div style="display: flex; align-items: center; gap: 0.85rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); margin-bottom: 1.8rem; flex-wrap: wrap;">
               
               <!-- SINGLE UPVOTE PILL BUTTON -->
-              <button id="upvoteThreadBtn" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); color: #a855f7; padding: 0.45rem 1.1rem; border-radius: 20px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; gap: 0.45rem; cursor: pointer; transition: all 0.2s ease;" title="Upvote Topic">
-                <i class="ph ph-arrow-fat-up-fill" style="font-size: 1.1rem;"></i>
+              <button id="upvoteThreadBtn" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); color: #ffffff; padding: 0.45rem 1.1rem; border-radius: 20px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; gap: 0.45rem; cursor: pointer; transition: all 0.2s ease;" title="Upvote Topic">
+                <span id="threadUpvoteIcon" style="display: flex; align-items: center; justify-content: center;">${getUpvoteIconSvg(false)}</span>
                 <span id="threadUpvoteCount">42</span>
               </button>
 
@@ -224,7 +229,12 @@
     if (body) body.textContent = topic.body;
 
     const userVote = store.getVoteStatus(topic.id);
-    if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + userVote;
+    const netScore = (topic.upvotes || 0) + userVote;
+    if (upvotesCount) upvotesCount.textContent = netScore;
+
+    const upvoteIconSpan = document.getElementById('threadUpvoteIcon');
+    if (upvoteIconSpan) upvoteIconSpan.innerHTML = getUpvoteIconSvg(userVote === 1);
+
     if (upvoteBtn) {
       if (userVote === 1) {
         upvoteBtn.style.background = 'linear-gradient(135deg, #a855f7, #7e22ce)';
@@ -232,7 +242,7 @@
         upvoteBtn.style.borderColor = '#a855f7';
       } else {
         upvoteBtn.style.background = 'rgba(168, 85, 247, 0.15)';
-        upvoteBtn.style.color = '#a855f7';
+        upvoteBtn.style.color = '#ffffff';
         upvoteBtn.style.borderColor = 'rgba(168, 85, 247, 0.35)';
       }
     }
@@ -338,7 +348,11 @@
 
         if (topic) {
           const upvotesCount = document.getElementById('threadUpvoteCount');
-          if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + newVote;
+          const netScore = (topic.upvotes || 0) + newVote;
+          if (upvotesCount) upvotesCount.textContent = netScore;
+
+          const upvoteIconSpan = document.getElementById('threadUpvoteIcon');
+          if (upvoteIconSpan) upvoteIconSpan.innerHTML = getUpvoteIconSvg(newVote === 1);
 
           if (newVote === 1) {
             upvoteBtn.style.background = 'linear-gradient(135deg, #a855f7, #7e22ce)';
@@ -346,7 +360,7 @@
             upvoteBtn.style.borderColor = '#a855f7';
           } else {
             upvoteBtn.style.background = 'rgba(168, 85, 247, 0.15)';
-            upvoteBtn.style.color = '#a855f7';
+            upvoteBtn.style.color = '#ffffff';
             upvoteBtn.style.borderColor = 'rgba(168, 85, 247, 0.35)';
           }
 
@@ -553,10 +567,10 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <!-- SINGLE REDDIT-STYLE UPVOTE PILL -->
-              <button class="vote-btn vote-up ${upvotedClass}" data-id="${t.id}" title="Upvote Topic" style="background: ${userVote === 1 ? 'linear-gradient(135deg, #a855f7, #7e22ce)' : 'rgba(168, 85, 247, 0.15)'}; border: 1px solid ${userVote === 1 ? '#a855f7' : 'rgba(168, 85, 247, 0.35)'}; color: ${userVote === 1 ? '#ffffff' : '#a855f7'}; padding: 0.35rem 0.85rem; border-radius: 20px; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; transition: all 0.2s ease;">
-                <i class="ph ph-arrow-fat-up-fill" style="font-size: 0.95rem;"></i>
-                <span class="forum-net-score">${netScore}</span>
+              <!-- SINGLE UPVOTE PILL WITH SVG UNFILLED OUTLINE / FILLED ARROW -->
+              <button class="vote-btn vote-up ${upvotedClass}" data-id="${t.id}" title="Upvote Topic" style="background: ${userVote === 1 ? 'linear-gradient(135deg, #a855f7, #7e22ce)' : 'rgba(168, 85, 247, 0.15)'}; border: 1px solid ${userVote === 1 ? '#a855f7' : 'rgba(168, 85, 247, 0.35)'}; color: #ffffff; padding: 0.35rem 0.85rem; border-radius: 20px; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; transition: all 0.2s ease;">
+                ${getUpvoteIconSvg(userVote === 1)}
+                <span class="forum-net-score" style="color: #ffffff;">${netScore}</span>
               </button>
 
               <span style="color: var(--mw-gold); font-weight: bold; font-size: 0.84rem; display: flex; align-items: center; gap: 0.35rem;">

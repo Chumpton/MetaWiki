@@ -402,12 +402,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Main Content HTML
     const mainText = document.getElementById('articleMainText');
     if (mainText) {
-      mainText.innerHTML = article.contentHTML;
+      const interp = typeof window.getMetaphysicalInterpretationHtml === 'function' ? window.getMetaphysicalInterpretationHtml(article) : '';
+      mainText.innerHTML = interp + (article.contentHTML || article.content || '');
     }
 
     // Build Dynamic TOC Sidebar & Initialize ScrollSpy
     buildDynamicTOC();
     initScrollSpy();
+
+    // Auto-fetch full live Wikipedia article data if content is a stub
+    const isStub = !article.contentHTML || article.contentHTML.length < 2500 || (article.contentHTML.match(/<h[23][^>]*>/gi) || []).length <= 1;
+    if (isStub && window.WikipediaImporter && typeof window.WikipediaImporter.importWikipediaArticle === 'function') {
+      const fetchTitle = article.title || articleId;
+      window.WikipediaImporter.importWikipediaArticle(fetchTitle, article.category)
+        .then(imported => {
+          if (imported && imported.fullContentHtml) {
+            article.contentHTML = imported.fullContentHtml;
+            article.fullContentHtml = imported.fullContentHtml;
+            article.isWikipediaSynced = true;
+            if (imported.imagePath) {
+              article.imagePath = imported.imagePath;
+              if (article.infobox) {
+                article.infobox.imagePath = imported.imagePath;
+                article.infobox.fullImage = imported.imagePath;
+              }
+            }
+            if (mainText) {
+              const interp = typeof window.getMetaphysicalInterpretationHtml === 'function' ? window.getMetaphysicalInterpretationHtml(article) : '';
+              mainText.innerHTML = interp + article.fullContentHtml;
+              buildDynamicTOC();
+            }
+          }
+        })
+        .catch(() => {});
+    }
 
     // Instantly scroll to top of article without smooth scroll lag
     window.scrollTo(0, 0);
@@ -490,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hoverTimeout = setTimeout(() => {
         hovercard.innerHTML = `
           <div class="mw-hovercard-title">${article.title}</div>
-          ${article.infobox && article.infobox.imagePath ? `<img src="${article.infobox.imagePath}" alt="${article.title}" class="mw-hovercard-img">` : ''}
+          ${article.infobox && article.infobox.imagePath ? `<img src="${window.getWikiImgUrl ? window.getWikiImgUrl(article.infobox.imagePath, 330) : article.infobox.imagePath}" alt="${article.title}" class="mw-hovercard-img">` : ''}
           <div class="mw-hovercard-excerpt">${article.shortDescription}</div>
           <div style="margin-top: 0.5rem;">${createHawkinsRainbowBar(article.hawkinsCalibration)}</div>
         `;
@@ -638,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
-    }, 7000); // Exactly 7 seconds per slide!
+    }, 5000); // Exactly 5 seconds per slide!
   }
 
   // =========================================================================
@@ -1041,7 +1069,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="featured-card" data-wiki="${card.wikiId}">
         <div>
           <div class="featured-card-thumb-wrapper">
-            <img src="${card.imagePath}" alt="${card.title}" class="featured-card-img">
+            <img src="${window.getWikiImgUrl ? window.getWikiImgUrl(card.imagePath || (card.infobox && card.infobox.imagePath), 330) : card.imagePath}" alt="${card.title}" class="featured-card-img">
           </div>
           <div class="featured-card-title">${card.title}</div>
           <div class="featured-card-subtitle">${card.subtitle}</div>
@@ -1074,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="triadic-card" data-wiki="${g.wikiId}">
           <div>
             <div class="triadic-thumbnail-pic" style="overflow: hidden;">
-              <img src="${g.imagePath}" alt="${g.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+              <img src="${window.getWikiImgUrl ? window.getWikiImgUrl(g.imagePath, 330) : g.imagePath}" alt="${g.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
             </div>
             <div class="triadic-card-title">${g.title}</div>
             <div class="triadic-card-subtitle">${g.subtitle}</div>
@@ -1096,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="triadic-card" data-wiki="${f.wikiId}">
           <div>
             <div class="triadic-thumbnail-pic" style="overflow: hidden;">
-              <img src="${f.imagePath}" alt="${f.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+              <img src="${window.getWikiImgUrl ? window.getWikiImgUrl(f.imagePath, 330) : f.imagePath}" alt="${f.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
             </div>
             <div class="triadic-card-title">${f.title}</div>
             <div class="triadic-card-subtitle">${f.subtitle}</div>
@@ -1118,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="triadic-card" data-wiki="${c.wikiId}">
           <div>
             <div class="triadic-thumbnail-pic" style="overflow: hidden;">
-              <img src="${c.imagePath}" alt="${c.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+              <img src="${window.getWikiImgUrl ? window.getWikiImgUrl(c.imagePath, 330) : c.imagePath}" alt="${c.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
             </div>
             <div class="triadic-card-title">${c.title}</div>
             <div class="triadic-card-subtitle">${c.subtitle}</div>
@@ -1140,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="triadic-card" data-wiki="${a.wikiId}">
           <div>
             <div class="triadic-thumbnail-pic" style="overflow: hidden;">
-              <img src="${a.imagePath}" alt="${a.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+              <img src="${window.getWikiImgUrl ? window.getWikiImgUrl(a.imagePath, 330) : a.imagePath}" alt="${a.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
             </div>
             <div class="triadic-card-title">${a.title}</div>
             <div class="triadic-card-subtitle">${a.role}</div>
@@ -1276,7 +1304,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <tr><th>${d.label}</th><td>${d.value}</td></tr>
     `).join('') : '';
 
-    let imgHeader = data.imagePath ? `<div style="text-align: center; padding: 0.5rem;"><img src="${data.imagePath}" alt="${data.title}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px;"></div>` : '';
+    const infoboxImgUrl = window.getWikiImgUrl ? window.getWikiImgUrl(data.imagePath, 400) : (data.imagePath || '');
+    let imgHeader = infoboxImgUrl ? `<div style="text-align: center; padding: 0.5rem;"><img src="${infoboxImgUrl}" alt="${data.title}" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px;"></div>` : '';
 
     container.innerHTML = `
       <table class="infobox">

@@ -443,8 +443,6 @@
       }
     });
   }
-    });
-  }
 
   function setupInterestsModal() {
     const modal = document.getElementById('interestsModal');
@@ -576,23 +574,27 @@
 
     let currentStage = 1;
 
-    // Fast initial lock onto stage 1 once mounted
+    // Fast initial lock onto slide 1 (stage 1) once mounted
     let mountAttempts = 0;
     const mountLockInterval = setInterval(() => {
       mountAttempts++;
       const driver = getActiveDriver();
       if (driver && driver.scrollHeight > driver.clientHeight) {
         const snaps = driver.querySelectorAll('.snap-section');
-        const totalStages = snaps.length > 1 ? snaps.length - 1 : 34;
-        const maxScroll = driver.scrollHeight - driver.clientHeight;
-        const stageHeight = maxScroll / totalStages;
-        driver.scrollTop = Math.round(stageHeight);
+        if (snaps.length > 1 && snaps[1].offsetTop > 0) {
+          driver.scrollTop = snaps[1].offsetTop;
+        } else {
+          const totalStages = snaps.length > 1 ? snaps.length - 1 : 34;
+          const maxScroll = driver.scrollHeight - driver.clientHeight;
+          const stageHeight = maxScroll / totalStages;
+          driver.scrollTop = Math.round(stageHeight);
+        }
         driver.dispatchEvent(new Event('scroll'));
         clearInterval(mountLockInterval);
       } else if (mountAttempts > 50) {
         clearInterval(mountLockInterval);
       }
-    }, 150);
+    }, 100);
 
     if (dimensionStepTimer) clearInterval(dimensionStepTimer);
 
@@ -609,18 +611,43 @@
 
       if (maxScroll <= 0) return;
 
-      const stageHeight = maxScroll / totalStages;
-      
-      currentStage++;
-      if (currentStage > totalStages) {
-        currentStage = 1;
+      if (snaps.length > 1) {
+        const currentScrollTop = driver.scrollTop;
+        let detectedIndex = 1;
+        let minDiff = Infinity;
+        snaps.forEach((sec, idx) => {
+          if (idx < 1) return;
+          const diff = Math.abs(sec.offsetTop - currentScrollTop);
+          if (diff < minDiff) {
+            minDiff = diff;
+            detectedIndex = idx;
+          }
+        });
+        currentStage = detectedIndex + 1;
+        if (currentStage >= snaps.length) {
+          currentStage = 1;
+        }
+        const targetSection = snaps[currentStage];
+        if (targetSection) {
+          driver.scrollTo({
+            top: targetSection.offsetTop,
+            behavior: 'smooth'
+          });
+          driver.dispatchEvent(new Event('scroll'));
+        }
+      } else {
+        const stageHeight = maxScroll / totalStages;
+        currentStage++;
+        if (currentStage > totalStages) {
+          currentStage = 1;
+        }
+        driver.scrollTo({
+          top: Math.round(currentStage * stageHeight),
+          behavior: 'smooth'
+        });
+        driver.dispatchEvent(new Event('scroll'));
       }
-
-      const targetScrollTop = Math.round(currentStage * stageHeight);
-      
-      driver.scrollTop = targetScrollTop;
-      driver.dispatchEvent(new Event('scroll'));
-    }, 4000);
+    }, 5000);
   }
 
   function setupScrollHideHeader() {

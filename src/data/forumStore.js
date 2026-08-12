@@ -184,6 +184,12 @@
         localStorage.setItem('metawiki_forum_votes', JSON.stringify(this.votesMap));
       } catch(e) {}
 
+      if (window.METAWIKI_FORUM_SERVICE && typeof window.METAWIKI_FORUM_SERVICE.toggleUpvote === 'function') {
+        try {
+          window.METAWIKI_FORUM_SERVICE.toggleUpvote(postId, newVote).catch(() => {});
+        } catch(e) {}
+      }
+
       return newVote;
     }
 

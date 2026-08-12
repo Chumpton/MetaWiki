@@ -18,8 +18,21 @@ function initMetaWikiApp() {
       guidesCategory: 'all',
       guidesVisibleCount: 15,
       forumCategory: 'all',
-      forumVisibleCount: 15
     };
+  }
+
+  // 1b. Pre-expand relative image paths to full HTTPS Wikimedia URLs
+  if (window.METAWIKI_DATA && Array.isArray(window.METAWIKI_DATA.articles)) {
+    window.METAWIKI_DATA.articles.forEach(article => {
+      if (article.infobox) {
+        if (article.infobox.imagePath && !article.infobox.imagePath.includes('://') && !article.infobox.imagePath.startsWith('data:')) {
+          article.infobox.imagePath = window.getWikiImgUrl ? window.getWikiImgUrl(article.infobox.imagePath) : ('https://upload.wikimedia.org/wikipedia/commons/thumb/' + article.infobox.imagePath + '/330px-' + article.infobox.imagePath.split('/').pop());
+        }
+        if (article.infobox.fullImage && !article.infobox.fullImage.includes('://') && !article.infobox.fullImage.startsWith('data:')) {
+          article.infobox.fullImage = window.getWikiImgUrl ? window.getWikiImgUrl(article.infobox.fullImage) : ('https://upload.wikimedia.org/wikipedia/commons/thumb/' + article.infobox.fullImage + '/640px-' + article.infobox.fullImage.split('/').pop());
+        }
+      }
+    });
   }
 
   // 2. Set Active Theme Attribute

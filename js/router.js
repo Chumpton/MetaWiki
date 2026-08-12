@@ -151,34 +151,62 @@
     const captionEl = document.getElementById('articleHeroCaption');
     if (captionEl) captionEl.textContent = article.imageCaption || article.title;
 
-    const bodyContainer = document.getElementById('articleMainText') || document.getElementById('articleBodyContainer');
-    if (bodyContainer) {
-      bodyContainer.innerHTML = article.contentHTML || article.content || `<p>${article.shortDescription || article.excerpt || 'Article content loading...'}</p>`;
-    }
+    function updateArticleContentAndTOC(art) {
+      const bodyContainer = document.getElementById('articleMainText') || document.getElementById('articleBodyContainer');
+      if (bodyContainer) {
+        const interp = typeof window.getMetaphysicalInterpretationHtml === 'function' ? window.getMetaphysicalInterpretationHtml(art) : '';
+        const rawContent = art.contentHTML || art.fullContentHtml || art.content || `<p>${art.shortDescription || art.excerpt || 'Article content loading...'}</p>`;
+        bodyContainer.innerHTML = interp + rawContent;
 
-    if (typeof window.renderInfobox === 'function' && article.infobox) {
-      window.renderInfobox(article.infobox);
-    }
+        const tocList = document.getElementById('articleTOCList');
+        if (tocList) {
+          const headings = bodyContainer.querySelectorAll('h2, h3');
+          if (headings.length > 0) {
+            tocList.innerHTML = Array.from(headings).map((h, i) => {
+              if (!h.id) h.id = 'heading-' + i;
+              return `<li><a href="#${h.id}" class="toc-sidebar-link">${h.textContent}</a></li>`;
+            }).join('');
 
-    // Build Table of Contents
-    const tocList = document.getElementById('articleTOCList');
-    if (tocList && bodyContainer) {
-      const headings = bodyContainer.querySelectorAll('h2, h3');
-      if (headings.length > 0) {
-        tocList.innerHTML = Array.from(headings).map((h, i) => {
-          if (!h.id) h.id = 'heading-' + i;
-          return `<li><a href="#${h.id}" class="toc-sidebar-link">${h.textContent}</a></li>`;
-        }).join('');
-
-        tocList.querySelectorAll('.toc-sidebar-link').forEach(link => {
-          link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href').replace('#', '');
-            const targetEl = document.getElementById(targetId);
-            if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
-          });
-        });
+            tocList.querySelectorAll('.toc-sidebar-link').forEach(link => {
+              link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').replace('#', '');
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
+              });
+            });
+          }
+        }
       }
+
+      if (typeof window.renderInfobox === 'function' && art.infobox) {
+        window.renderInfobox(art.infobox);
+      }
+    }
+
+    updateArticleContentAndTOC(article);
+
+    // Auto-fetch full live Wikipedia article data if content is a stub
+    const isStub = !article.contentHTML || article.contentHTML.length < 2500 || (article.contentHTML.match(/<h[23][^>]*>/gi) || []).length <= 1;
+    if (isStub && window.WikipediaImporter && typeof window.WikipediaImporter.importWikipediaArticle === 'function') {
+      const fetchTitle = article.title || wikiId;
+      window.WikipediaImporter.importWikipediaArticle(fetchTitle, article.category)
+        .then(imported => {
+          if (imported && imported.fullContentHtml) {
+            article.contentHTML = imported.fullContentHtml;
+            article.fullContentHtml = imported.fullContentHtml;
+            article.isWikipediaSynced = true;
+            if (imported.imagePath) {
+              article.imagePath = imported.imagePath;
+              if (article.infobox) {
+                article.infobox.imagePath = imported.imagePath;
+                article.infobox.fullImage = imported.imagePath;
+              }
+            }
+            updateArticleContentAndTOC(article);
+          }
+        })
+        .catch(() => {});
     }
 
     document.title = article.title + ' — MetaWiki';

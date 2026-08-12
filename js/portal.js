@@ -257,7 +257,7 @@
       <div class="featured-card" data-wiki="${card.id}" style="cursor: pointer;">
         <div>
           <div class="featured-card-thumb-wrapper">
-            <img src="${card.infobox.imagePath}" alt="${card.title}" class="featured-card-img" referrerpolicy="no-referrer">
+            <img src="${window.getWikiImgUrl ? window.getWikiImgUrl((card.infobox && card.infobox.imagePath) || card.imagePath, 330) : card.imagePath}" alt="${card.title}" class="featured-card-img" referrerpolicy="no-referrer">
           </div>
           <div class="featured-card-title">${card.title}</div>
           <div class="featured-card-subtitle">${card.shortDescription}</div>

@@ -131,8 +131,30 @@ function generateArticles() {
           </p>
         </div>
         <div class="wiki-content-body">
-          <h2 id="overview" class="article-section-title">Overview & Context</h2>
-          <p><strong>${title}</strong> is a foundational concept in <em>${cat}</em> that has shaped metaphysical inquiry and comparative philosophy.</p>
+          <h2 id="overview" class="article-section-title">1. Overview & Historical Context</h2>
+          <p><strong>${title}</strong> is a foundational concept in <em>${cat}</em> that has shaped metaphysical inquiry, comparative philosophy, and transpersonal understanding across historical epochs. It provides an essential conceptual bridge between manifest phenomenon and unmanifest essence.</p>
+
+          <h2 id="history" class="article-section-title">2. Historical Development & Perennial Lineage</h2>
+          <p>The philosophical evolution of <strong>${title}</strong> can be traced through ancient contemplative traditions into modern metaphysical synthesis. Early thinkers recognized that empirical perception alone could not account for the structural coherence of reality, postulating underlying organizing principles.</p>
+          <p>Throughout scholastic and hermetic traditions, scholars preserved these insights, mapping how form, energy, and mind interact across dimensions of existence.</p>
+
+          <h2 id="core-principles" class="article-section-title">3. Core Philosophies, Principles & Dynamics</h2>
+          <p>At the center of <strong>${title}</strong> are several primary metaphysical dynamics:</p>
+          <ul>
+            <li><strong>Ontological Primacy:</strong> Consciousness precedes matter, establishing subjective awareness as the ground of all experience.</li>
+            <li><strong>Structural Coherence:</strong> Universal laws govern the manifestation of form, maintaining balance across systemic scales.</li>
+            <li><strong>Non-Dual Unity:</strong> Apparent dualities resolve into a singular unconditioned reality when perceived from higher calibrations.</li>
+          </ul>
+
+          <h2 id="metaphysical-mechanics" class="article-section-title">4. Metaphysical Mechanics & Ontological Framework</h2>
+          <p>In terms of ontological mechanics, <strong>${title}</strong> operates through a triad of intent, resonance, and manifestation. By examining the subtle relationship between observer and observed, initiates gain insight into how mental states project perceived reality.</p>
+
+          <h2 id="consciousness-calibration" class="article-section-title">5. Consciousness Analysis & Hawkins Calibration</h2>
+          <p>On Dr. David R. Hawkins' Map of Consciousness, <strong>${title}</strong> is calibrated at <strong>${locStr}</strong>. At this level of awareness, perception shifts from dualistic linear reasoning to non-linear realization, dissolving egoic identification and expanding into transcendent clarity.</p>
+
+          <h2 id="synthesis-references" class="article-section-title">6. Comparative Non-Dual Synthesis & Academic References</h2>
+          <p>When aligned with comparative perennial philosophy—including Advaita Vedanta, Hermeticism, and Depth Psychology—<strong>${title}</strong> confirms the universal convergence of ancient wisdom and contemporary consciousness research.</p>
+          <p><em>References:</em> Standard Academic MetaWiki Corpus & Live Wikipedia Database Integration.</p>
         </div>
       `
     });

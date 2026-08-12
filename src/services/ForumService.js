@@ -26,6 +26,12 @@
       if (session && session.token) {
         headers['Authorization'] = `Bearer ${session.token}`;
       }
+      if (window.METAWIKI_SUPABASE_ANON_KEY) {
+        headers['apikey'] = window.METAWIKI_SUPABASE_ANON_KEY;
+        if (!headers['Authorization']) {
+          headers['Authorization'] = `Bearer ${window.METAWIKI_SUPABASE_ANON_KEY}`;
+        }
+      }
       return headers;
     }
 
@@ -34,8 +40,12 @@
      */
     async fetchPosts() {
       try {
+        const headers = this.getHeaders();
+        if (!headers['Authorization'] && !headers['apikey']) {
+          return this.posts;
+        }
         const res = await fetch(`${SUPABASE_URL}/rest/v1/forum_posts?select=*,profiles(*)&order=created_at.desc`, {
-          headers: this.getHeaders()
+          headers: headers
         });
         if (res.ok) {
           const rawData = await res.json();
@@ -179,6 +189,32 @@
       }
 
       return commentObj;
+    }
+
+    /**
+     * Toggle or update post upvote count in Supabase backend
+     */
+    async toggleUpvote(postId, newVote) {
+      try {
+        const headers = this.getHeaders();
+        const post = window.METAWIKI_FORUM_STORE ? window.METAWIKI_FORUM_STORE.getPostById(postId) : null;
+        const baseUpvotes = post ? (post.upvotes || 0) : 0;
+        const netCount = Math.max(0, baseUpvotes + (newVote === 1 ? 1 : 0));
+
+        if (headers['Authorization'] || headers['apikey']) {
+          await fetch(`${SUPABASE_URL}/rest/v1/forum_posts?id=eq.${postId}`, {
+            method: 'PATCH',
+            headers: headers,
+            body: JSON.stringify({
+              upvotes_count: netCount
+            })
+          });
+        }
+        return netCount;
+      } catch (e) {
+        console.warn('Could not sync upvote to Supabase backend:', e);
+      }
+      return 0;
     }
   }
 

@@ -56,8 +56,13 @@
       this.listeners = [];
       this.simulateGuildMembershipCheckPass = true;
 
-      // Automatically check for incoming OAuth callback tokens on load
+      // Automatically check for incoming OAuth callback tokens on load or restore persistent session
       setTimeout(() => {
+        const active = this.getSession();
+        if (active) {
+          this.notify(active);
+          window.dispatchEvent(new CustomEvent('metawiki_auth_changed', { detail: active }));
+        }
         this.parseOAuthCallback();
       }, 50);
     }

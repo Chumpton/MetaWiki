@@ -272,36 +272,125 @@
     const dropdown = document.getElementById(dropdownId);
     if (!input || !dropdown) return;
 
+    let selectedIndex = -1;
+
+    const TRENDING_TOPIC_TAGS = [
+      { label: '🔮 Hermeticism', query: 'Hermeticism' },
+      { label: '📊 Hawkins Scale', query: 'Hawkins' },
+      { label: '⚡ Quantum Metaphysics', query: 'Quantum' },
+      { label: '☸️ Non-Duality', query: 'Non-Duality' },
+      { label: '📐 Sacred Geometry', query: 'Geometry' },
+      { label: '🕊️ Gnosticism', query: 'Gnosticism' },
+      { label: '🧠 Archetypal Psychology', query: 'Psychology' }
+    ];
+
     const trendingArticles = [
-      { id: "divine-logos", tag: "🔥 Trending" },
-      { id: "advaita-vedanta-nonduality", tag: "🔥 Popular" },
-      { id: "patanjali-eight-limbs", tag: "🔥 Trending" },
-      { id: "jungian-archetypes-shadow", tag: "🔥 Popular" },
-      { id: "ten-sephirot-tree-of-life", tag: "🔥 Trending" }
+      { id: "platos-theory-of-forms", tag: "🔥 #1 Trending", category: "Philosophy" },
+      { id: "emerald-tablet-of-hermes", tag: "🔥 Popular", category: "Hermeticism" },
+      { id: "hawkins-scale-map-of-consciousness", tag: "⚡ Featured", category: "Consciousness" },
+      { id: "carl-jung-shadow-archetypes", tag: "🧠 Trending", category: "Psychology" },
+      { id: "divine-logos-metaphysics", tag: "✨ Popular", category: "Metaphysics" },
+      { id: "advaita-vedanta-nonduality", tag: "☸️ Trending", category: "Non-Duality" }
     ];
 
     function renderTrending() {
       if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
-      const trendingItems = trendingArticles.map(t => {
+      
+      const tagChipsHtml = `
+        <div style="padding: 0.75rem 1rem 0.5rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(15, 12, 28, 0.95);">
+          <div style="font-size: 0.72rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="ph ph-trend-up"></i> Trending Topics & Directives
+          </div>
+          <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+            ${TRENDING_TOPIC_TAGS.map(t => `
+              <span class="search-trending-chip" data-query="${t.query}" style="font-size: 0.75rem; font-weight: 700; color: #e2e8f0; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.25rem 0.65rem; border-radius: 14px; cursor: pointer; transition: all 0.2s ease;">
+                ${t.label}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      const trendingItemsHtml = trendingArticles.map(t => {
         const article = window.METAWIKI_DATA.articles.find(a => a.id === t.id);
         if (!article) return '';
         return `
-          <div class="search-dropdown-item" data-id="${article.id}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+          <div class="search-dropdown-item" data-id="${article.id}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 0.15s ease;">
             <div>
-              <strong style="color: var(--mw-gold); font-family: var(--font-heading); font-size: 0.95rem;">${article.title}</strong>
-              <div style="font-size: 0.8rem; color: var(--mw-text-muted);">${article.shortDescription}</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <strong style="color: var(--mw-gold); font-family: var(--font-heading); font-size: 0.95rem;">${article.title}</strong>
+                <span style="font-size: 0.68rem; background: rgba(168, 85, 247, 0.18); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700;">${article.category || 'Metaphysics'}</span>
+              </div>
+              <div style="font-size: 0.8rem; color: var(--mw-text-muted); margin-top: 0.15rem;">${article.shortDescription}</div>
             </div>
             <span style="font-size: 0.7rem; font-weight: 800; background: rgba(251, 191, 36, 0.15); color: var(--mw-gold); border: 1px solid var(--mw-border-gold); padding: 0.15rem 0.5rem; border-radius: 10px; flex-shrink: 0; margin-left: 0.5rem;">${t.tag}</span>
           </div>
         `;
       }).join('');
 
-      dropdown.innerHTML = `
-        <div style="padding: 0.5rem 1rem; font-size: 0.72rem; font-weight: 800; color: var(--mw-gold); text-transform: uppercase; letter-spacing: 1px; background: rgba(10, 10, 15, 0.95);">
-          ✨ Popular Metaphysical Searches
+      dropdown.innerHTML = tagChipsHtml + trendingItemsHtml;
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.search-trending-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const query = chip.getAttribute('data-query');
+          input.value = query;
+          input.focus();
+          triggerSearch(query);
+        });
+      });
+
+      dropdown.querySelectorAll('.search-dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.getAttribute('data-id');
+          if (id && typeof window.loadArticle === 'function') window.loadArticle(id);
+          dropdown.style.display = 'none';
+        });
+      });
+    }
+
+    function triggerSearch(queryStr) {
+      const q = queryStr.toLowerCase().trim();
+      if (!q) {
+        renderTrending();
+        return;
+      }
+
+      if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
+      
+      const matches = window.METAWIKI_DATA.articles.filter(a => 
+        a.title.toLowerCase().includes(q) || 
+        a.shortDescription.toLowerCase().includes(q) ||
+        (a.category && a.category.toLowerCase().includes(q))
+      ).slice(0, 8);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div style="padding: 1.2rem; color: var(--mw-text-muted); text-align: center; font-style: italic; font-size: 0.88rem;">No contemplations found matching "${q}"</div>`;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      const matchHeader = `
+        <div style="padding: 0.5rem 1rem; font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; background: rgba(10, 10, 15, 0.98); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center;">
+          <span>Predictive Search Results (${matches.length})</span>
+          <span style="font-weight: 500; font-size: 0.68rem; color: #fbbf24;">Press ↵ to open top match</span>
         </div>
-        ${trendingItems}
       `;
+
+      dropdown.innerHTML = matchHeader + matches.map((a, idx) => {
+        const titleHighlighted = a.title.replace(new RegExp(`(${q})`, 'gi'), `<mark style="background: rgba(251, 191, 36, 0.25); color: #fbbf24; border-radius: 2px; padding: 0 2px;">$1</mark>`);
+        return `
+          <div class="search-dropdown-item predictive-item" data-id="${a.id}" data-index="${idx}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer; transition: background 0.15s ease;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;">
+              <strong style="color: #ffffff; font-family: var(--font-heading); font-size: 0.95rem;">${titleHighlighted}</strong>
+              <span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 0.1rem 0.45rem; border-radius: 6px; font-weight: 700; flex-shrink: 0;">${a.category || 'Article'}</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--mw-text-muted); line-height: 1.35;">${a.shortDescription}</div>
+          </div>
+        `;
+      }).join('');
+
       dropdown.style.display = 'block';
 
       dropdown.querySelectorAll('.search-dropdown-item').forEach(item => {
@@ -318,46 +407,42 @@
     });
 
     input.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderTrending();
-        return;
-      }
+      triggerSearch(e.target.value);
+    });
 
-      if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
-      const matches = window.METAWIKI_DATA.articles.filter(a => 
-        a.title.toLowerCase().includes(q) || 
-        a.shortDescription.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q)
-      ).slice(0, 8);
+    input.addEventListener('keydown', (e) => {
+      const items = dropdown.querySelectorAll('.predictive-item');
+      if (items.length === 0) return;
 
-      if (matches.length === 0) {
-        dropdown.innerHTML = `<div style="padding: 1rem; color: var(--mw-text-muted); text-align: center; font-style: italic;">No contemplations found matching "${q}"</div>`;
-        dropdown.style.display = 'block';
-        return;
-      }
-
-      dropdown.innerHTML = matches.map(a => `
-        <div class="search-dropdown-item" data-id="${a.id}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer;">
-          <strong style="color: var(--mw-gold); font-family: var(--font-heading); font-size: 0.95rem; display: block; margin-bottom: 0.2rem;">${a.title}</strong>
-          <div style="font-size: 0.8rem; color: var(--mw-text-muted); line-height: 1.3;">${a.shortDescription}</div>
-        </div>
-      `).join('');
-      dropdown.style.display = 'block';
-
-      dropdown.querySelectorAll('.search-dropdown-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const id = item.getAttribute('data-id');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        items.forEach((item, idx) => {
+          item.style.background = idx === selectedIndex ? 'rgba(251, 191, 36, 0.12)' : 'transparent';
+        });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        items.forEach((item, idx) => {
+          item.style.background = idx === selectedIndex ? 'rgba(251, 191, 36, 0.12)' : 'transparent';
+        });
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const target = selectedIndex >= 0 ? items[selectedIndex] : items[0];
+        if (target) {
+          const id = target.getAttribute('data-id');
           if (id && typeof window.loadArticle === 'function') window.loadArticle(id);
           dropdown.style.display = 'none';
-        });
-      });
+        }
+      }
     });
 
     document.addEventListener('click', (e) => {
       if (!input.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = 'none';
       }
+    });
+  }
     });
   }
 

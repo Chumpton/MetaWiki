@@ -88,11 +88,6 @@
               <span style="position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.65rem; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--mw-gold); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--mw-gold); backdrop-filter: blur(4px);">
                 ${a.category || 'Metaphysics'}
               </span>
-
-              <!-- THUMBNAIL REAL-TIME VIEW COUNTER BADGE -->
-              <span style="position: absolute; bottom: 8px; left: 8px; padding: 0.2rem 0.6rem; background: rgba(0, 0, 0, 0.8); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; font-size: 0.72rem; font-weight: 800; color: #ffffff; backdrop-filter: blur(6px); display: flex; align-items: center; gap: 0.35rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-                <i class="ph ph-eye" style="color: #fbbf24; font-size: 0.85rem;"></i> ${viewsFormatted}
-              </span>
             </div>
             <div class="triadic-card-title" style="margin-top: 0.8rem;">${a.title}</div>
             <div class="triadic-card-summary" style="font-size: 0.82rem; color: var(--mw-text-muted); line-height: 1.4; margin-top: 0.4rem;">
@@ -256,7 +251,7 @@
     const container = document.getElementById('featuredCarouselGrid');
     if (!container || !window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
 
-    const featured = window.METAWIKI_DATA.articles.slice(0, 6);
+    const featured = window.METAWIKI_DATA.articles.slice(0, 4);
     container.innerHTML = featured.map(card => `
       <div class="featured-card" data-wiki="${card.id}" style="cursor: pointer;">
         <div>

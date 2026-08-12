@@ -8,8 +8,8 @@
   'use strict';
 
   function initMockAuthTestPanel() {
-    // Inject floating test widget DOM if not already present
-    if (document.getElementById('mockAuthTestWidgetContainer')) return;
+    // Disabled as requested: Remove bottom left mock auth test lab
+    return;
 
     const container = document.createElement('div');
     container.id = 'mockAuthTestWidgetContainer';

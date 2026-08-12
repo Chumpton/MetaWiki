@@ -96,36 +96,41 @@
     switchView('forums');
   }
 
-  function getArticleViewsFormatted(articleId, defaultViewsStr) {
-    if (!articleId) return defaultViewsStr || '45,000';
+  function getArticleViewsFormatted(articleId) {
+    if (!articleId) return '0';
     try {
       const storedMap = JSON.parse(localStorage.getItem('metawiki_article_views_map') || '{}');
       let currentNum = storedMap[articleId];
       if (currentNum === undefined) {
-        const raw = String(defaultViewsStr || '45000').replace(/\D/g, '');
-        currentNum = parseInt(raw) || Math.floor(40000 + Math.random() * 20000);
+        currentNum = 0;
       }
       return currentNum.toLocaleString();
     } catch (e) {
-      return defaultViewsStr || '45,000';
+      return '0';
     }
   }
 
-  function incrementAndGetArticleViews(articleId, defaultViewsStr) {
-    if (!articleId) return defaultViewsStr || '45,000';
+  function incrementAndGetArticleViews(articleId) {
+    if (!articleId) return '0';
     try {
       const storedMap = JSON.parse(localStorage.getItem('metawiki_article_views_map') || '{}');
-      let currentNum = storedMap[articleId];
-      if (currentNum === undefined) {
-        const raw = String(defaultViewsStr || '45000').replace(/\D/g, '');
-        currentNum = parseInt(raw) || Math.floor(40000 + Math.random() * 20000);
-      }
+      let currentNum = storedMap[articleId] || 0;
       currentNum += 1;
       storedMap[articleId] = currentNum;
       localStorage.setItem('metawiki_article_views_map', JSON.stringify(storedMap));
+
+      // Asynchronously record authentic click view to backend if connected
+      if (window.METAWIKI_AUTH && window.METAWIKI_AUTH.supabaseClient) {
+        try {
+          window.METAWIKI_AUTH.supabaseClient
+            .rpc('increment_article_views', { article_slug: articleId })
+            .catch(() => {});
+        } catch (err) {}
+      }
+
       return currentNum.toLocaleString();
     } catch (e) {
-      return defaultViewsStr || '45,000';
+      return '0';
     }
   }
 

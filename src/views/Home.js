@@ -196,7 +196,7 @@
     const container = document.getElementById('featuredCarouselGrid');
     if (!container || !window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
 
-    const featured = window.METAWIKI_DATA.articles.slice(0, 6);
+    const featured = window.METAWIKI_DATA.articles.slice(0, 4);
     container.innerHTML = featured.map(card => {
       if (window.ArticleCard && window.ArticleCard.renderFeaturedCard) {
         return window.ArticleCard.renderFeaturedCard(card);

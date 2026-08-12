@@ -68,8 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof window.initMemberProfileModal === 'function') {
     window.initMemberProfileModal();
   }
-  if (typeof window.initMockAuthTestPanel === 'function') {
-    window.initMockAuthTestPanel();
+  if (typeof window.initSiteDebugger === 'function') {
+    window.initSiteDebugger();
+  }
+  if (window.WikipediaImporter && typeof window.WikipediaImporter.initWikipediaImportBotModal === 'function') {
+    window.WikipediaImporter.initWikipediaImportBotModal();
   }
 
   // 8. Bind Hero Events & Universal Navigation Click Delegation

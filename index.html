@@ -565,6 +565,11 @@
       <button id="confirmDiscordLoginBtn" class="btn-discord-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem; font-weight: 800; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: #5865F2; color: #fff; border: none; cursor: pointer;">
         <i class="ph ph-discord-logo" style="font-size: 1.4rem;"></i> Sign Up / Sign In with Discord
       </button>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; color: #cbd5e1; font-size: 0.85rem;">
+        <input type="checkbox" id="discordRememberMeCheck" checked style="accent-color: #5865F2; width: 16px; height: 16px; cursor: pointer;">
+        <label for="discordRememberMeCheck" style="cursor: pointer; font-weight: 500;">Remember me & instant auto sign-in</label>
+      </div>
     </div>
   </div>
 
@@ -665,7 +670,11 @@
 
   <!-- Navigation Router & UI Engines -->
   <script src="js/router.js"></script>
+  <script src="js/portal.js"></script>
+  <script src="js/forums.js"></script>
   <script src="js/ui_components.js"></script>
+  <script src="js/debugger.js"></script>
+  <script src="js/wikipedia_importer.js"></script>
 
   <!-- Application Main Entry Point -->
   <script src="main.js"></script>

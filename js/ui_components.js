@@ -1,0 +1,529 @@
+/**
+ * MetaWiki - Sitewide UI Components & Modals Engine
+ * Controls Theme Accent Color, Semantic Search, Live Community Chat, Interests Customization, and Dimension Viewer.
+ */
+
+(function(window) {
+  'use strict';
+
+  const AVAILABLE_INTEREST_TAGS = [
+    'Non-Duality', 'World Religions & Gnosticism', 'Judaism & Kabbalah',
+    'Islam & Sufism', 'Hinduism & Advaita Vedanta', 'Buddhism & Zen',
+    'Hermeticism & Alchemy', 'Western Philosophy & Neoplatonism',
+    'Depth & Transpersonal Psychology', 'Sacred Geometry & Quantum Metaphysics'
+  ];
+
+  function setupThemeColorController() {
+    const wheelBtn = document.getElementById('themeColorWheelBtn');
+    const popover = document.getElementById('themeColorPopover');
+    const closeBtn = document.getElementById('closeThemePopoverBtn');
+    const picker = document.getElementById('themeColorPicker');
+    const resetBtn = document.getElementById('resetThemeColorBtn');
+    const swatches = document.querySelectorAll('.swatch-btn');
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const num = parseInt(hex, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
+
+    function applyThemeColor(hex) {
+      if (!hex) return;
+      const root = document.documentElement;
+      const rgb = hexToRgb(hex);
+
+      root.style.setProperty('--mw-gold', hex);
+      root.style.setProperty('--mw-border-gold', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.35)`);
+      root.style.setProperty('--mw-glow-gold', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`);
+      localStorage.setItem('metawiki_theme_color', hex);
+      if (picker) picker.value = hex;
+    }
+
+    const saved = localStorage.getItem('metawiki_theme_color');
+    if (saved) applyThemeColor(saved);
+
+    if (wheelBtn && popover) {
+      wheelBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popover.style.display = popover.style.display === 'none' || !popover.style.display ? 'block' : 'none';
+      });
+    }
+
+    if (closeBtn && popover) {
+      closeBtn.addEventListener('click', () => { popover.style.display = 'none'; });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (popover && popover.style.display === 'block' && !popover.contains(e.target) && e.target !== wheelBtn) {
+        popover.style.display = 'none';
+      }
+    });
+
+    if (picker) {
+      picker.addEventListener('input', (e) => applyThemeColor(e.target.value));
+    }
+
+    swatches.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const color = btn.getAttribute('data-color');
+        if (color) applyThemeColor(color);
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        localStorage.removeItem('metawiki_theme_color');
+        applyThemeColor('#fbbf24');
+      });
+    }
+  }
+
+  function setupLiveCommunityChat() {
+    const launcher = document.getElementById('liveChatLauncher');
+    const drawer = document.getElementById('liveChatDrawer');
+    const closeBtn = document.getElementById('closeLiveChatBtn');
+    const input = document.getElementById('liveChatInput');
+    const sendBtn = document.getElementById('liveChatSendBtn');
+    const messagesContainer = document.getElementById('liveChatMessages');
+    const userBanner = document.getElementById('chatUserBanner');
+
+    let activeChannel = 'general';
+
+    const defaultMessagesByChannel = {
+      general: [
+        { author: "EgoDissolver#9999", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80", time: "10:14 AM", text: "Welcome seekers! Anyone contemplating Gospel of Thomas today?", role: "Non-Dual Observer (LoC 600+)" },
+        { author: "Sophia_Lover#4040", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80", time: "10:18 AM", text: "The Hawkins LoC 700 calibration on Hesychasm is spot on. Pure Tabor light contemplation.", role: "Ascended Luminary (LoC 700+)" }
+      ],
+      hawkins: [
+        { author: "CalibrationAdept#1008", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80", time: "09:45 AM", text: "Notice how transitioning from intellect (LoC 400) to spiritual love (LoC 540) shifts perception from linear to field dynamics.", role: "Intellectual Adept (LoC 400)" }
+      ],
+      hermetic: [
+        { author: "KybalionInitiate#7777", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80", time: "08:30 AM", text: "Principle of Polarity: 'Opposites are identical in nature, but different in degree.'", role: "Hermetic Initiate (LoC 540)" }
+      ]
+    };
+
+    function getMessages() {
+      try {
+        const stored = localStorage.getItem('metawiki_chat_channels');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return parsed[activeChannel] || defaultMessagesByChannel[activeChannel] || [];
+        }
+      } catch (e) {}
+      return defaultMessagesByChannel[activeChannel] || [];
+    }
+
+    function saveMessage(msgObj) {
+      try {
+        const stored = JSON.parse(localStorage.getItem('metawiki_chat_channels') || '{}');
+        stored[activeChannel] = stored[activeChannel] || [...(defaultMessagesByChannel[activeChannel] || [])];
+        stored[activeChannel].push(msgObj);
+        localStorage.setItem('metawiki_chat_channels', JSON.stringify(stored));
+      } catch (e) {}
+    }
+
+    function renderUserBanner() {
+      if (!userBanner) return;
+      const auth = window.METAWIKI_AUTH || window.METAWIKI_DISCORD_BACKEND;
+      const session = auth ? auth.getSession() : null;
+
+      if (session) {
+        let cleanRole = session.role || 'Verified';
+        if (cleanRole.includes('(')) cleanRole = cleanRole.split('(')[0].trim();
+
+        userBanner.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.75rem; background: rgba(16, 185, 129, 0.08); border-bottom: 1px solid rgba(16, 185, 129, 0.2);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="${session.avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #4ade80;" alt="User">
+              <span style="font-weight: 800; color: #fff; font-size: 0.8rem;">${session.fullHandle}</span>
+            </div>
+            <span style="font-size: 0.7rem; color: #4ade80; font-weight: 700;"><i class="ph ph-check-circle"></i> ${cleanRole}</span>
+          </div>
+        `;
+      } else {
+        userBanner.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.75rem; background: rgba(251, 191, 36, 0.06); border-bottom: 1px solid var(--mw-border);">
+            <div style="font-size: 0.78rem; color: var(--mw-text-muted);">Chatting as <strong>Initiate_Guest</strong></div>
+            <button id="chatLoginBtn" style="background: none; border: none; color: var(--mw-gold); cursor: pointer; font-size: 0.78rem; font-weight: bold; text-decoration: underline;">Sign In with Discord</button>
+          </div>
+        `;
+        const loginBtn = document.getElementById('chatLoginBtn');
+        if (loginBtn && window.METAWIKI_DISCORD_BACKEND) {
+          loginBtn.addEventListener('click', () => window.METAWIKI_DISCORD_BACKEND.openModal());
+        }
+      }
+    }
+
+    function renderMessages() {
+      if (!messagesContainer) return;
+      const msgs = getMessages();
+      messagesContainer.innerHTML = msgs.map(m => `
+        <div style="margin-bottom: 0.85rem; display: flex; gap: 0.6rem; align-items: flex-start;">
+          <img src="${m.avatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--mw-border-gold);" alt="Avatar">
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
+              <span style="font-weight: 800; color: var(--mw-gold); font-size: 0.82rem;">${m.author}</span>
+              <span style="font-size: 0.68rem; color: var(--mw-text-muted);">${m.time}</span>
+            </div>
+            <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.4; background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">${m.text}</div>
+          </div>
+        </div>
+      `).join('');
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function sendMessage() {
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const auth = window.METAWIKI_AUTH || window.METAWIKI_DISCORD_BACKEND;
+      const session = auth ? auth.getSession() : null;
+      const author = session ? session.fullHandle : 'GnosticSeeker#1008';
+      const avatar = session ? session.avatar : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
+      const role = session ? session.role : 'Initiatory Seeker (LoC 200+)';
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const msgObj = { author, avatar, role, time: timeStr, text };
+      saveMessage(msgObj);
+      input.value = '';
+      renderMessages();
+    }
+
+    if (launcher && drawer) {
+      launcher.addEventListener('click', () => {
+        drawer.style.display = drawer.style.display === 'none' || !drawer.style.display ? 'flex' : 'none';
+        renderUserBanner();
+        renderMessages();
+      });
+    }
+
+    if (closeBtn && drawer) {
+      closeBtn.addEventListener('click', () => { drawer.style.display = 'none'; });
+    }
+
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (input) {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendMessage();
+      });
+    }
+
+    document.querySelectorAll('.chat-emoji-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (input) {
+          input.value += btn.getAttribute('data-emoji');
+          input.focus();
+        }
+      });
+    });
+
+    window.addEventListener('metawiki_auth_changed', () => {
+      renderUserBanner();
+    });
+
+    renderUserBanner();
+  }
+
+  function setupSearch(inputId, dropdownId) {
+    const input = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    if (!input || !dropdown) return;
+
+    const trendingArticles = [
+      { id: "divine-logos", tag: "🔥 Trending" },
+      { id: "advaita-vedanta-nonduality", tag: "🔥 Popular" },
+      { id: "patanjali-eight-limbs", tag: "🔥 Trending" },
+      { id: "jungian-archetypes-shadow", tag: "🔥 Popular" },
+      { id: "ten-sephirot-tree-of-life", tag: "🔥 Trending" }
+    ];
+
+    function renderTrending() {
+      if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
+      const trendingItems = trendingArticles.map(t => {
+        const article = window.METAWIKI_DATA.articles.find(a => a.id === t.id);
+        if (!article) return '';
+        return `
+          <div class="search-dropdown-item" data-id="${article.id}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <strong style="color: var(--mw-gold); font-family: var(--font-heading); font-size: 0.95rem;">${article.title}</strong>
+              <div style="font-size: 0.8rem; color: var(--mw-text-muted);">${article.shortDescription}</div>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 800; background: rgba(251, 191, 36, 0.15); color: var(--mw-gold); border: 1px solid var(--mw-border-gold); padding: 0.15rem 0.5rem; border-radius: 10px; flex-shrink: 0; margin-left: 0.5rem;">${t.tag}</span>
+          </div>
+        `;
+      }).join('');
+
+      dropdown.innerHTML = `
+        <div style="padding: 0.5rem 1rem; font-size: 0.72rem; font-weight: 800; color: var(--mw-gold); text-transform: uppercase; letter-spacing: 1px; background: rgba(10, 10, 15, 0.95);">
+          ✨ Popular Metaphysical Searches
+        </div>
+        ${trendingItems}
+      `;
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.search-dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.getAttribute('data-id');
+          if (id && typeof window.loadArticle === 'function') window.loadArticle(id);
+          dropdown.style.display = 'none';
+        });
+      });
+    }
+
+    input.addEventListener('focus', () => {
+      if (!input.value.trim()) renderTrending();
+    });
+
+    input.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderTrending();
+        return;
+      }
+
+      if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles) return;
+      const matches = window.METAWIKI_DATA.articles.filter(a => 
+        a.title.toLowerCase().includes(q) || 
+        a.shortDescription.toLowerCase().includes(q) ||
+        a.category.toLowerCase().includes(q)
+      ).slice(0, 8);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `<div style="padding: 1rem; color: var(--mw-text-muted); text-align: center; font-style: italic;">No contemplations found matching "${q}"</div>`;
+        dropdown.style.display = 'block';
+        return;
+      }
+
+      dropdown.innerHTML = matches.map(a => `
+        <div class="search-dropdown-item" data-id="${a.id}" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--mw-border); cursor: pointer;">
+          <strong style="color: var(--mw-gold); font-family: var(--font-heading); font-size: 0.95rem; display: block; margin-bottom: 0.2rem;">${a.title}</strong>
+          <div style="font-size: 0.8rem; color: var(--mw-text-muted); line-height: 1.3;">${a.shortDescription}</div>
+        </div>
+      `).join('');
+      dropdown.style.display = 'block';
+
+      dropdown.querySelectorAll('.search-dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.getAttribute('data-id');
+          if (id && typeof window.loadArticle === 'function') window.loadArticle(id);
+          dropdown.style.display = 'none';
+        });
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  }
+
+  function setupInterestsModal() {
+    const modal = document.getElementById('interestsModal');
+    const openBtn = document.getElementById('openInterestsModalBtn');
+    const closeBtn = document.getElementById('closeInterestsModalBtn');
+    const saveBtn = document.getElementById('saveInterestsBtn');
+    const resetBtn = document.getElementById('resetInterestsBtn');
+    const grid = document.getElementById('interestsChipsGrid');
+
+    if (!modal || !grid) return;
+
+    function renderChips() {
+      const state = window.state || {};
+      const userInterests = state.userInterests || AVAILABLE_INTEREST_TAGS;
+
+      grid.innerHTML = AVAILABLE_INTEREST_TAGS.map(tag => {
+        const isSelected = userInterests.includes(tag);
+        return `<button class="interests-chip-btn ${isSelected ? 'selected' : ''}" data-tag="${tag}">${isSelected ? '✓ ' : ''}${tag}</button>`;
+      }).join('');
+
+      grid.querySelectorAll('.interests-chip-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tag = btn.getAttribute('data-tag');
+          if (!window.state) window.state = {};
+          if (!window.state.userInterests) window.state.userInterests = [...AVAILABLE_INTEREST_TAGS];
+
+          if (window.state.userInterests.includes(tag)) {
+            window.state.userInterests = window.state.userInterests.filter(t => t !== tag);
+          } else {
+            window.state.userInterests.push(tag);
+          }
+          renderChips();
+        });
+      });
+    }
+
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        renderChips();
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (!window.state) window.state = {};
+        window.state.userInterests = [...AVAILABLE_INTEREST_TAGS];
+        renderChips();
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        if (window.state && window.state.userInterests) {
+          localStorage.setItem('metawiki_user_interests', JSON.stringify(window.state.userInterests));
+        }
+        modal.style.display = 'none';
+
+        if (!window.state) window.state = {};
+        window.state.feedCategory = 'foryou';
+        window.state.feedSortBy = 'foryou';
+        window.state.feedPage = 1;
+
+        const tabsContainer = document.getElementById('categoryTabsBar');
+        if (tabsContainer) {
+          tabsContainer.querySelectorAll('.cat-bubble-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-cat') === 'foryou');
+          });
+        }
+        const sortSelect = document.getElementById('feedSortSelect');
+        if (sortSelect) sortSelect.value = 'foryou';
+
+        if (typeof window.renderPortalFeed === 'function') window.renderPortalFeed();
+      });
+    }
+  }
+
+  let dimensionStepTimer = null;
+
+  function initDimensionViewer() {
+    const btnFullscreen = document.getElementById('btnFullscreenDimension');
+    const modalFullscreen = document.getElementById('dimensionFullscreenModal');
+    const btnCloseFullscreen = document.getElementById('closeDimensionFullscreenBtn');
+
+    const HOLD_SECONDS = 7; // Stay on each section for 7 seconds
+    const TOTAL_STAGES = 34; // 34 stages in the dimension viewer widget
+
+    function getDriver() {
+      return document.querySelector('#cnscns-widget .scroll-driver');
+    }
+
+    function scrollToSection(secIndex) {
+      const driver = getDriver();
+      if (!driver) return false;
+
+      const maxScroll = driver.scrollHeight - driver.clientHeight;
+      if (maxScroll <= 0) return false;
+
+      const secH = maxScroll / TOTAL_STAGES;
+      const targetTop = Math.min(Math.max(0, secIndex) * secH, maxScroll);
+
+      // Snap transition instantly to section top
+      driver.scrollTop = targetTop;
+      return true;
+    }
+
+    function startSectionTraversal() {
+      if (dimensionStepTimer) clearInterval(dimensionStepTimer);
+
+      let currentSection = 1; // Skip section 0, start on section 1
+
+      // Ensure initial snap to section 1 when widget DOM is ready
+      let retries = 0;
+      const initCheck = setInterval(() => {
+        retries++;
+        if (scrollToSection(1) || retries > 25) {
+          clearInterval(initCheck);
+        }
+      }, 200);
+
+      // Every 7 seconds, snap transition to the next section (1 to 34)
+      dimensionStepTimer = setInterval(() => {
+        currentSection++;
+        if (currentSection > TOTAL_STAGES) {
+          currentSection = 1; // Loop back to section 1 (skipping 0)
+        }
+        scrollToSection(currentSection);
+      }, HOLD_SECONDS * 1000);
+    }
+
+    if (btnFullscreen && modalFullscreen) {
+      btnFullscreen.addEventListener('click', () => {
+        modalFullscreen.style.display = 'block';
+        if (window.CnscnsWidget && typeof window.CnscnsWidget.initFullscreen === 'function') {
+          window.CnscnsWidget.initFullscreen('cnscns-widget-fullscreen');
+        }
+      });
+    }
+
+    if (btnCloseFullscreen && modalFullscreen) {
+      btnCloseFullscreen.addEventListener('click', () => {
+        modalFullscreen.style.display = 'none';
+      });
+    }
+
+    // Start the gentle section-by-section traversal (starts at infinity)
+    startSectionTraversal();
+  }
+
+  function setupScrollHideHeader() {
+    let lastScrollY = window.scrollY;
+
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      const globalNav = document.getElementById('mwGlobalNav');
+
+      if (window.state && window.state.view === 'article') {
+        if (globalNav) {
+          globalNav.classList.remove('nav-hidden');
+          globalNav.style.display = 'flex';
+        }
+        return;
+      }
+
+      if (currentScrollY > lastScrollY + 8 && currentScrollY > 120) {
+        if (globalNav) globalNav.classList.add('nav-hidden');
+      } else if (currentScrollY < lastScrollY - 4) {
+        if (globalNav) globalNav.classList.remove('nav-hidden');
+      }
+      lastScrollY = currentScrollY;
+    });
+  }
+
+  function getWikiImgUrl(shortPath, width = 330) {
+    if (!shortPath || typeof shortPath !== 'string') {
+      return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';
+    }
+    if (shortPath.startsWith('http://') || shortPath.startsWith('https://') || shortPath.startsWith('data:')) {
+      return shortPath;
+    }
+    const cleanPath = shortPath.replace(/^\/+/, '');
+    const parts = cleanPath.split('/');
+    const fileName = parts[parts.length - 1];
+
+    if (fileName.toLowerCase().endsWith('.svg')) {
+      return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}.png`;
+    }
+
+    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}`;
+  }
+
+  // Export UI Components API
+  window.AVAILABLE_INTEREST_TAGS = AVAILABLE_INTEREST_TAGS;
+  window.getWikiImgUrl = getWikiImgUrl;
+  window.setupThemeColorController = setupThemeColorController;
+  window.setupLiveCommunityChat = setupLiveCommunityChat;
+  window.setupSearch = setupSearch;
+  window.setupInterestsModal = setupInterestsModal;
+  window.initDimensionViewer = initDimensionViewer;
+  window.setupScrollHideHeader = setupScrollHideHeader;
+
+})(window);

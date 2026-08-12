@@ -353,7 +353,57 @@
   function bindUniversalClickDelegation() {
     if (typeof document === 'undefined' || !document.addEventListener) return;
     document.addEventListener('click', (e) => {
-      // Reply button click inside forum topic card
+      // 1. Global Navigation Bar Items
+      const navItem = e.target.closest('.mw-nav-item, #mwGlobalNav a, [data-view]');
+      if (navItem) {
+        const id = navItem.id;
+        const viewAttr = navItem.getAttribute('data-view');
+        
+        if (id === 'navHomeBtn' || viewAttr === 'portal' || viewAttr === 'home') {
+          e.preventDefault();
+          showPortalView();
+          updateNavActiveState('navHomeBtn');
+          return;
+        }
+        
+        if (id === 'navGuidesBtn' || viewAttr === 'guides') {
+          e.preventDefault();
+          showPortalView();
+          updateNavActiveState('navGuidesBtn');
+          setTimeout(() => {
+            const guidesEl = document.getElementById('hawkinsGuideSection') || document.getElementById('guidesSection');
+            if (guidesEl) guidesEl.scrollIntoView({ behavior: 'smooth' });
+          }, 80);
+          return;
+        }
+        
+        if (id === 'navForumsBtn' || viewAttr === 'forums') {
+          e.preventDefault();
+          showForumsView();
+          updateNavActiveState('navForumsBtn');
+          return;
+        }
+        
+        if (id === 'heroRandomBtn' || viewAttr === 'random') {
+          e.preventDefault();
+          loadRandomArticle();
+          return;
+        }
+
+        if (id === 'navDiscordBtn') {
+          e.preventDefault();
+          const auth = window.METAWIKI_AUTH;
+          const session = auth ? auth.getSession() : null;
+          if (session) {
+            if (typeof window.openMemberProfileModal === 'function') window.openMemberProfileModal();
+          } else {
+            if (window.METAWIKI_DISCORD_BACKEND) window.METAWIKI_DISCORD_BACKEND.openModal();
+          }
+          return;
+        }
+      }
+
+      // 2. Reply button click inside forum topic card
       const replyBtn = e.target.closest('[data-action="reply"]');
       if (replyBtn) {
         e.preventDefault();
@@ -367,7 +417,7 @@
         return;
       }
 
-      // Article Card or Thumbnail Click
+      // 3. Article Card or Thumbnail Click
       const card = e.target.closest('[data-wiki]');
       if (card) {
         if (card.classList.contains('forum-topic-card')) return;

@@ -77,6 +77,10 @@
     }
 
     getPosts() {
+      window.METAWIKI_DATA = window.METAWIKI_DATA || {};
+      if (!window.METAWIKI_DATA.forumTopics || window.METAWIKI_DATA.forumTopics.length === 0) {
+        window.METAWIKI_DATA.forumTopics = this.posts;
+      }
       return this.posts;
     }
 

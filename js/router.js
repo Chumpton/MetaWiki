@@ -21,35 +21,48 @@
   }
 
   function forceScrollTop() {
-    if (document.documentElement && document.documentElement.style) {
+    if (document.documentElement && document.documentElement.style && typeof document.documentElement.style.setProperty === 'function') {
       document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
     }
-    if (document.body && document.body.style) {
+    if (document.body && document.body.style && typeof document.body.style.setProperty === 'function') {
       document.body.style.setProperty('scroll-behavior', 'auto', 'important');
     }
 
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
     if (document.documentElement) document.documentElement.scrollTop = 0;
     if (document.body) document.body.scrollTop = 0;
 
     requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
       if (document.documentElement) document.documentElement.scrollTop = 0;
       if (document.body) document.body.scrollTop = 0;
     });
 
     setTimeout(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
       if (document.documentElement) document.documentElement.scrollTop = 0;
       if (document.body) document.body.scrollTop = 0;
-      if (document.documentElement && document.documentElement.style) document.documentElement.style.removeProperty('scroll-behavior');
-      if (document.body && document.body.style) document.body.style.removeProperty('scroll-behavior');
+      if (document.documentElement && document.documentElement.style && typeof document.documentElement.style.removeProperty === 'function') {
+        document.documentElement.style.removeProperty('scroll-behavior');
+      }
+      if (document.body && document.body.style && typeof document.body.style.removeProperty === 'function') {
+        document.body.style.removeProperty('scroll-behavior');
+      }
     }, 80);
   }
 
   function switchView(targetView) {
+    window.state = window.state || {};
+    window.state.view = targetView;
+
     const portalView = document.getElementById('initiatoryPortalView');
-    const forumsView = document.getElementById('metaphysicalForumsView');
+    const forumsView = document.getElementById('forumsView') || document.getElementById('metaphysicalForumsView');
     const articleView = document.getElementById('articleReaderView');
     const spatialView = document.getElementById('spatialMapView');
 
@@ -70,7 +83,7 @@
         window.renderForums();
       }
     } else if (targetView === 'article' || targetView === 'spatial') {
-      showGlobalNav(false);
+      showGlobalNav(true);
     }
 
     forceScrollTop();
@@ -105,14 +118,14 @@
     const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
     if (breadcrumbCurrent) breadcrumbCurrent.textContent = article.title;
 
-    const titleEl = document.getElementById('articleTitle');
+    const titleEl = document.getElementById('articleMainTitle') || document.getElementById('articleTitle');
     if (titleEl) titleEl.textContent = article.title;
 
     const categoryEl = document.getElementById('articleCategoryPill');
     if (categoryEl) categoryEl.textContent = article.category || 'Metaphysics';
 
-    const subheaderEl = document.getElementById('articleSubheader');
-    if (subheaderEl) subheaderEl.textContent = article.subtitle || article.excerpt || '';
+    const subheaderEl = document.getElementById('articleMainSubtitle') || document.getElementById('articleSubheader');
+    if (subheaderEl) subheaderEl.textContent = article.subtitle || article.shortDescription || article.excerpt || '';
 
     const viewsCountEl = document.getElementById('articleViewsCount');
     if (viewsCountEl) viewsCountEl.textContent = article.views || '185,000';
@@ -120,7 +133,7 @@
     const hawkinsFill = document.getElementById('articleHawkinsFill');
     const hawkinsLabel = document.getElementById('articleHawkinsLabel');
     if (hawkinsFill && hawkinsLabel) {
-      const loc = article.hawkinsScale || 500;
+      const loc = article.hawkinsNumeric || article.hawkinsScale || 500;
       const percent = Math.round(((Math.max(200, Math.min(1000, loc)) - 200) / 800) * 100);
       hawkinsFill.style.width = percent + '%';
       hawkinsLabel.textContent = `LoC ${loc} — ${article.hawkinsLabel || 'Reason'}`;
@@ -128,7 +141,7 @@
 
     const heroImg = document.getElementById('articleHeroImg');
     if (heroImg) {
-      heroImg.src = article.image || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/The_Fool_Tarot_Card.pas/300px-The_Fool_Tarot_Card.jpg';
+      heroImg.src = article.image || article.imagePath || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/The_Fool_Tarot_Card.pas/300px-The_Fool_Tarot_Card.jpg';
       heroImg.alt = article.title;
       heroImg.onerror = () => {
         heroImg.src = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
@@ -138,9 +151,13 @@
     const captionEl = document.getElementById('articleHeroCaption');
     if (captionEl) captionEl.textContent = article.imageCaption || article.title;
 
-    const bodyContainer = document.getElementById('articleBodyContainer');
+    const bodyContainer = document.getElementById('articleMainText') || document.getElementById('articleBodyContainer');
     if (bodyContainer) {
-      bodyContainer.innerHTML = article.content || `<p>${article.excerpt || 'Article content loading...'}</p>`;
+      bodyContainer.innerHTML = article.contentHTML || article.content || `<p>${article.shortDescription || article.excerpt || 'Article content loading...'}</p>`;
+    }
+
+    if (typeof window.renderInfobox === 'function' && article.infobox) {
+      window.renderInfobox(article.infobox);
     }
 
     // Build Table of Contents

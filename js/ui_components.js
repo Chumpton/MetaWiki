@@ -129,23 +129,20 @@
       const session = auth ? auth.getSession() : null;
 
       if (session) {
-        let cleanRole = session.role || 'Verified';
-        if (cleanRole.includes('(')) cleanRole = cleanRole.split('(')[0].trim();
-
         userBanner.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.75rem; background: rgba(16, 185, 129, 0.08); border-bottom: 1px solid rgba(16, 185, 129, 0.2);">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <img src="${session.avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #4ade80;" alt="User">
-              <span style="font-weight: 800; color: #fff; font-size: 0.8rem;">${session.fullHandle}</span>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.9rem; background: #2b2d31; border-bottom: 1px solid #1f2023;">
+            <div style="display: flex; align-items: center; gap: 0.45rem;">
+              <img src="${session.avatar}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #23a55a;" alt="User">
+              <span style="font-weight: 700; color: #f2f3f5; font-size: 0.78rem;">${session.username}</span>
             </div>
-            <span style="font-size: 0.7rem; color: #4ade80; font-weight: 700;"><i class="ph ph-check-circle"></i> ${cleanRole}</span>
+            <span style="font-size: 0.68rem; color: #23a55a; font-weight: 700; display: inline-flex; align-items: center; gap: 0.2rem;"><i class="ph ph-check-circle"></i> Verified Initiate</span>
           </div>
         `;
       } else {
         userBanner.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.75rem; background: rgba(251, 191, 36, 0.06); border-bottom: 1px solid var(--mw-border);">
-            <div style="font-size: 0.78rem; color: var(--mw-text-muted);">Chatting as <strong>Initiate_Guest</strong></div>
-            <button id="chatLoginBtn" style="background: none; border: none; color: var(--mw-gold); cursor: pointer; font-size: 0.78rem; font-weight: bold; text-decoration: underline;">Sign In with Discord</button>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.9rem; background: #2b2d31; border-bottom: 1px solid #1f2023;">
+            <div style="font-size: 0.75rem; color: #949ba4;">Chatting as <strong style="color: #dbdee1;">Guest Initiate</strong></div>
+            <button id="chatLoginBtn" style="background: none; border: none; color: #5865F2; cursor: pointer; font-size: 0.75rem; font-weight: 700; text-decoration: underline;">Sign In with Discord</button>
           </div>
         `;
         const loginBtn = document.getElementById('chatLoginBtn');
@@ -159,14 +156,14 @@
       if (!messagesContainer) return;
       const msgs = getMessages();
       messagesContainer.innerHTML = msgs.map(m => `
-        <div style="margin-bottom: 0.85rem; display: flex; gap: 0.6rem; align-items: flex-start;">
-          <img src="${m.avatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--mw-border-gold);" alt="Avatar">
-          <div style="flex: 1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
-              <span style="font-weight: 800; color: var(--mw-gold); font-size: 0.82rem;">${m.author}</span>
-              <span style="font-size: 0.68rem; color: var(--mw-text-muted);">${m.time}</span>
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.2rem 0.3rem; border-radius: 4px; transition: background 0.15s ease;">
+          <img src="${m.avatar}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 0.1rem;" alt="${m.author}">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: baseline; gap: 0.55rem; margin-bottom: 0.15rem;">
+              <span style="font-weight: 700; color: #f2f3f5; font-size: 0.88rem; letter-spacing: -0.01em;">${m.author}</span>
+              <span style="font-size: 0.68rem; color: #949ba4; font-weight: 500;">${m.time || 'Today at 10:42 AM'}</span>
             </div>
-            <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.4; background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">${m.text}</div>
+            <div style="font-size: 0.88rem; color: #dbdee1; line-height: 1.45; word-wrap: break-word;">${m.text}</div>
           </div>
         </div>
       `).join('');

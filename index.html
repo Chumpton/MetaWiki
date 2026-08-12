@@ -499,8 +499,6 @@
 
   <!-- =========================================================================
        5. LIVE COMMUNITY WISDOM CHAT DRAWER WIDGET (BOTTOM-RIGHT CHAT BUBBLE)
-       ========================================================================= -->
-  <!-- =========================================================================
        5. LIVE COMMUNITY WISDOM CHAT DRAWER WIDGET (DISCORD INTEGRATED)
        ========================================================================= -->
   <button class="live-chat-launcher" id="liveChatLauncher" title="Open Live Community Chat">
@@ -509,41 +507,40 @@
   </button>
 
   <div class="live-chat-drawer" id="liveChatDrawer" style="display: none;">
-    <div class="live-chat-header">
-      <div style="display: flex; align-items: center; gap: 0.6rem;">
-        <i class="ph ph-discord-logo" style="color: #5865F2; font-size: 1.4rem;"></i>
-        <div>
-          <div class="live-chat-title">MetaWiki Live Discord Chat</div>
-          <div class="live-chat-status" id="liveChatStatus"><span class="status-dot"></span> 142 Initiates Online</div>
-        </div>
+    <!-- DISCORD CHANNEL HEADER -->
+    <div class="live-chat-header" style="padding: 0.75rem 1rem; background: #2b2d31; border-bottom: 1px solid #1f2023; display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; gap: 0.45rem; overflow: hidden;">
+        <i class="ph ph-hash" style="color: #80848e; font-size: 1.25rem; font-weight: bold;"></i>
+        <span style="font-family: var(--font-heading); font-size: 0.95rem; font-weight: 800; color: #f2f3f5;">general</span>
+        <span style="border-left: 1px solid #3f4147; padding-left: 0.5rem; color: #949ba4; font-size: 0.75rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">MetaWiki Contemplative Chat</span>
       </div>
-      <button id="closeLiveChatBtn" style="background: none; border: none; color: var(--mw-text-muted); cursor: pointer; font-size: 1.2rem;">✕</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0;">
+        <span style="font-size: 0.7rem; color: #23a55a; background: rgba(35, 165, 90, 0.15); border: 1px solid rgba(35, 165, 90, 0.3); padding: 0.15rem 0.5rem; border-radius: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem;">
+          <span style="width: 6px; height: 6px; border-radius: 50%; background: #23a55a; display: inline-block;"></span> 142 Online
+        </span>
+        <button id="closeLiveChatBtn" style="background: none; border: none; color: #b5bac1; cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 0.2rem;" title="Close Chat">✕</button>
+      </div>
     </div>
 
-    <!-- Logged in User Bar -->
+    <!-- Logged in User Status Strip -->
     <div class="chat-user-banner" id="chatUserBanner">
       <!-- Populated dynamically via JS -->
     </div>
 
-    <div class="live-chat-messages" id="liveChatMessages">
+    <!-- DISCORD CHAT MESSAGES FEED (#313338 background) -->
+    <div class="live-chat-messages" id="liveChatMessages" style="flex: 1; padding: 0.85rem 1rem; background: #313338; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;">
       <!-- Populated dynamically -->
     </div>
 
-    <!-- Quick Emoji Bar -->
-    <div class="chat-emoji-row">
-      <button class="chat-emoji-btn" data-emoji="✨">✨</button>
-      <button class="chat-emoji-btn" data-emoji="☸️">☸️</button>
-      <button class="chat-emoji-btn" data-emoji="🕉️">🕉️</button>
-      <button class="chat-emoji-btn" data-emoji="☯️">☯️</button>
-      <button class="chat-emoji-btn" data-emoji="🔮">🔮</button>
-      <button class="chat-emoji-btn" data-emoji="⚡">⚡</button>
-      <button class="chat-emoji-btn" data-emoji="📜">📜</button>
-      <button class="chat-emoji-btn" data-emoji="🔥">🔥</button>
-    </div>
-
-    <div class="live-chat-input-row">
-      <input type="text" id="liveChatInput" class="live-chat-input" placeholder="Type a message to the Discord community...">
-      <button id="liveChatSendBtn" class="live-chat-send-btn">Send</button>
+    <!-- DISCORD-STYLE MESSAGE INPUT BAR -->
+    <div style="padding: 0.75rem 0.9rem; background: #313338; border-top: 1px solid #2b2d31;">
+      <div style="display: flex; align-items: center; background: #383a40; border-radius: 8px; padding: 0.4rem 0.75rem; gap: 0.5rem;">
+        <button style="background: #4e5058; color: #b5bac1; border: none; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; flex-shrink: 0;" title="Attach File or Media">+</button>
+        <input type="text" id="liveChatInput" style="flex: 1; background: transparent; border: none; color: #dbdee1; font-size: 0.88rem; font-family: var(--font-sans-wiki); outline: none;" placeholder="Message #general">
+        <button id="liveChatSendBtn" style="background: #5865F2; color: #ffffff; border: none; border-radius: 6px; padding: 0.35rem 0.8rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; flex-shrink: 0; transition: background 0.2s ease;">
+          Send <i class="ph ph-paper-plane-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 

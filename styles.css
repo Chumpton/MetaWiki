@@ -630,27 +630,29 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   bottom: 6rem;
   right: 2rem;
-  width: 380px;
-  height: 520px;
-  background: rgba(12, 12, 16, 0.98);
+  width: 390px;
+  height: 540px;
+  background: #313338;
   backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 18px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+  border: 1px solid #2b2d31;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
   z-index: 5000;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.live-chat-header { padding: 1rem 1.2rem; background: rgba(18, 18, 24, 0.9); border-bottom: 1px solid var(--mw-border); display: flex; align-items: center; justify-content: space-between; }
-.live-chat-title { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 0.5rem; }
-.live-chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; }
-.chat-msg { background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 0.6rem 0.8rem; font-size: 0.85rem; }
-.chat-msg-user { font-weight: bold; color: #ffffff; font-size: 0.78rem; margin-bottom: 0.2rem; }
-.live-chat-input-row { padding: 0.8rem; background: rgba(18, 18, 24, 0.9); border-top: 1px solid var(--mw-border); display: flex; gap: 0.5rem; }
-.live-chat-input { flex: 1; padding: 0.6rem 0.8rem; background: rgba(10, 10, 14, 0.9); border: 1px solid var(--mw-border); border-radius: 8px; color: #fff; font-family: var(--font-sans-wiki); outline: none; font-size: 0.85rem; }
-.live-chat-send-btn { padding: 0.6rem 1rem; background: #ffffff; color: #000000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+.live-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.live-chat-messages::-webkit-scrollbar-track {
+  background: #2b2d31;
+}
+.live-chat-messages::-webkit-scrollbar-thumb {
+  background: #1a1b1e;
+  border-radius: 4px;
+}
 
 /* COMMUNITY FORUMS VIEW STYLING */
 .forum-container { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 5rem 2rem; }

@@ -1,7 +1,7 @@
 /**
  * MetaWiki - Master Unified Authentication Service & Real Discord OAuth Adapter
- * Parses authentic live Discord user profile metadata (username, avatar, global_name, ID),
- * calculates real user level/EXP, handles Remember Me session persistence, and supports Supabase Auth.
+ * Handles dynamic return URL detection (GitHub Pages, Vercel, or Localhost),
+ * authentic Discord API user profile parsing, Remember Me persistence, and level/EXP tracking.
  */
 
 (function (window) {
@@ -131,12 +131,12 @@
     }
 
     /**
-     * Redirect User to Real Live Discord OAuth Authorization Page
+     * Redirect User to Real Live Discord OAuth Authorization Page (Dynamic Return URL)
      */
     startRealDiscordOAuth() {
       if (typeof window === 'undefined') return;
-      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
-      const authUrl = `https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/authorize?provider=discord&redirect_to=${redirectUri}`;
+      const currentUrl = window.location.href.split('#')[0].split('?')[0];
+      const authUrl = `https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/authorize?provider=discord&redirect_to=${encodeURIComponent(currentUrl)}`;
       window.location.href = authUrl;
     }
 

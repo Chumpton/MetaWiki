@@ -431,6 +431,20 @@
       navHomeBtn.addEventListener('click', (e) => {
         e.preventDefault();
         showPortalView();
+        updateNavActiveState('navHomeBtn');
+      });
+    }
+
+    const navGuidesBtn = document.getElementById('navGuidesBtn');
+    if (navGuidesBtn) {
+      navGuidesBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPortalView();
+        updateNavActiveState('navGuidesBtn');
+        setTimeout(() => {
+          const guidesEl = document.getElementById('hawkinsGuideSection') || document.getElementById('guidesSection');
+          if (guidesEl) guidesEl.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       });
     }
 
@@ -439,6 +453,7 @@
       navForumsBtn.addEventListener('click', (e) => {
         e.preventDefault();
         showForumsView();
+        updateNavActiveState('navForumsBtn');
       });
     }
 

@@ -529,73 +529,112 @@
   let dimensionStepTimer = null;
 
   function initDimensionViewer() {
+    const wrapper = document.getElementById('dimensionMiniWrapper');
     const btnFullscreen = document.getElementById('btnFullscreenDimension');
-    const modalFullscreen = document.getElementById('dimensionFullscreenModal');
+    const fullscreenModal = document.getElementById('dimensionFullscreenModal');
     const btnCloseFullscreen = document.getElementById('closeDimensionFullscreenBtn');
 
-    const HOLD_SECONDS = 7; // Stay on each section for 7 seconds
-    const TOTAL_STAGES = 34; // 34 stages in the dimension viewer widget
-
-    function getDriver() {
-      return document.querySelector('#cnscns-widget .scroll-driver');
+    if (wrapper) {
+      wrapper.addEventListener('mouseenter', () => { if (window.state) window.state.isHoverPaused = true; });
+      wrapper.addEventListener('mouseleave', () => { if (window.state) window.state.isHoverPaused = false; });
     }
 
-    function scrollToSection(secIndex) {
-      const driver = getDriver();
-      if (!driver) return false;
-
-      const maxScroll = driver.scrollHeight - driver.clientHeight;
-      if (maxScroll <= 0) return false;
-
-      const secH = maxScroll / TOTAL_STAGES;
-      const targetTop = Math.min(Math.max(0, secIndex) * secH, maxScroll);
-
-      // Snap transition instantly to section top
-      driver.scrollTop = targetTop;
-      return true;
-    }
-
-    function startSectionTraversal() {
-      if (dimensionStepTimer) clearInterval(dimensionStepTimer);
-
-      let currentSection = 1; // Skip section 0, start on section 1
-
-      // Ensure initial snap to section 1 when widget DOM is ready
-      let retries = 0;
-      const initCheck = setInterval(() => {
-        retries++;
-        if (scrollToSection(1) || retries > 25) {
-          clearInterval(initCheck);
-        }
-      }, 200);
-
-      // Every 7 seconds, snap transition to the next section (1 to 34)
-      dimensionStepTimer = setInterval(() => {
-        currentSection++;
-        if (currentSection > TOTAL_STAGES) {
-          currentSection = 1; // Loop back to section 1 (skipping 0)
-        }
-        scrollToSection(currentSection);
-      }, HOLD_SECONDS * 1000);
-    }
-
-    if (btnFullscreen && modalFullscreen) {
+    if (btnFullscreen && fullscreenModal) {
       btnFullscreen.addEventListener('click', () => {
-        modalFullscreen.style.display = 'block';
-        if (window.CnscnsWidget && typeof window.CnscnsWidget.initFullscreen === 'function') {
-          window.CnscnsWidget.initFullscreen('cnscns-widget-fullscreen');
-        }
+        fullscreenModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+          const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
+          if (fsDriver) {
+            const fsSnaps = fsDriver.querySelectorAll('.snap-section');
+            if (fsSnaps.length > 1) fsDriver.scrollTop = fsSnaps[1].offsetTop;
+          }
+        }, 60);
       });
     }
 
-    if (btnCloseFullscreen && modalFullscreen) {
+    if (btnCloseFullscreen && fullscreenModal) {
       btnCloseFullscreen.addEventListener('click', () => {
-        modalFullscreen.style.display = 'none';
+        fullscreenModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
       });
     }
 
-    // Start the gentle section-by-section traversal (starts at infinity)
-    startSectionTraversal();
+    let currentSlideIndex = 1;
+
+    const attemptInfinityLock = () => {
+      let locked = false;
+      const miniDriver = document.querySelector('#cnscns-widget .scroll-driver') || document.querySelector('#dimensionMiniWrapper .scroll-driver');
+      if (miniDriver) {
+        const snaps = miniDriver.querySelectorAll('.snap-section');
+        if (snaps.length > 1 && snaps[1].offsetTop > 0) {
+          miniDriver.scrollTop = snaps[1].offsetTop;
+          locked = true;
+        }
+      }
+      const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
+      if (fsDriver) {
+        const fsSnaps = fsDriver.querySelectorAll('.snap-section');
+        if (fsSnaps.length > 1 && fsSnaps[1].offsetTop > 0) {
+          fsDriver.scrollTop = fsSnaps[1].offsetTop;
+        }
+      }
+      return locked;
+    };
+
+    // Poll until React renders .snap-section elements and locks onto Infinity slide
+    const lockPoll = setInterval(() => {
+      if (attemptInfinityLock()) {
+        clearInterval(lockPoll);
+      }
+    }, 40);
+
+    setTimeout(attemptInfinityLock, 100);
+    setTimeout(attemptInfinityLock, 350);
+    setTimeout(attemptInfinityLock, 800);
+    setTimeout(attemptInfinityLock, 1500);
+
+    if (dimensionStepTimer) clearInterval(dimensionStepTimer);
+
+    // Clean Synchronized 7-Second Slide Pacing
+    dimensionStepTimer = setInterval(() => {
+      if (window.state && window.state.isHoverPaused) return; // Pause on hover!
+      const miniDriver = document.querySelector('#cnscns-widget .scroll-driver') || document.querySelector('#dimensionMiniWrapper .scroll-driver');
+      const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
+      const activeDriver = (fullscreenModal && fullscreenModal.style.display === 'block' && fsDriver) ? fsDriver : miniDriver;
+
+      if (activeDriver) {
+        const snapSections = activeDriver.querySelectorAll('.snap-section');
+        if (snapSections.length > 1) {
+          const currentScrollTop = activeDriver.scrollTop;
+          let detectedIndex = 1;
+          let minDiff = Infinity;
+
+          snapSections.forEach((sec, idx) => {
+            if (idx < 1) return;
+            const diff = Math.abs(sec.offsetTop - currentScrollTop);
+            if (diff < minDiff) {
+              minDiff = diff;
+              detectedIndex = idx;
+            }
+          });
+
+          currentSlideIndex = detectedIndex + 1;
+          if (currentSlideIndex >= snapSections.length) {
+            currentSlideIndex = 1; // Loop back to slide 1
+          }
+
+          const targetSnap = snapSections[currentSlideIndex];
+          if (targetSnap) {
+            activeDriver.scrollTo({
+              top: targetSnap.offsetTop,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }
+    }, 7000);
   }
 
   function setupScrollHideHeader() {

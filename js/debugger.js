@@ -169,7 +169,7 @@
       if (viewId) detailsStr += ` | Action: switchView("${viewId}")`;
 
       appendLog('CLICK', `Clicked: "${label}"`, detailsStr);
-    }, true);
+    }, false);
 
     window.initSiteDebugger = initSiteDebugger;
   }

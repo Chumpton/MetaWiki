@@ -1,6 +1,6 @@
 /**
  * MetaWiki Minimalist Discord Authentication Controller
- * Controls live Discord OAuth2 redirection, nav button username display with avatar & level counter,
+ * Controls live Discord OAuth2 redirection, nav button username display with profile avatar,
  * and member profile modal triggers.
  */
 
@@ -54,15 +54,13 @@
     if (!navBtn) return;
 
     if (session) {
-      const level = session.level || session.hawkinsLoC || 700;
       navBtn.innerHTML = `
-        <span style="display: inline-flex; align-items: center; gap: 0.5rem;">
-          <img src="${session.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);" alt="Profile Picture">
+        <span style="display: inline-flex; align-items: center; gap: 0.55rem;">
+          <img src="${session.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1.5px solid #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);" alt="Profile Picture">
           <span style="color: #ffffff; font-weight: 800; font-size: 0.9rem;">${session.username}</span>
-          <span style="font-size: 0.72rem; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.35); padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 0.2rem;">Level ${level}</span>
         </span>
       `;
-      navBtn.title = `Logged in as ${session.fullHandle} (Level ${level}) — Click to open Member Profile`;
+      navBtn.title = `Logged in as ${session.fullHandle} — Click to open Member Profile`;
     } else {
       navBtn.innerHTML = `<i class="ph ph-discord-logo" style="color: #5865F2;"></i> <span id="discordNavLabel">Sign In / Sign Up with Discord</span>`;
       navBtn.title = `Sign In or Sign Up with Discord`;

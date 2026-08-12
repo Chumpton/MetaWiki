@@ -1,7 +1,7 @@
 /**
- * MetaWiki - Metaphysical Community Forums Engine (Reconstructed & Fully Functional)
- * Full Reddit-style thread screen mode, modal injector, upvoting, category bubble feed filtering,
- * live comments, and official Campton community post.
+ * MetaWiki - Metaphysical Community Forums Engine
+ * Clean category badges (no r/), handles (no u/), sleek Reddit-style comment box,
+ * optimistic front-end comment posting, keyboard Ctrl+Enter submission, and backend API routes.
  */
 
 (function(window) {
@@ -25,14 +25,15 @@
     avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
     handle: '@campton',
     body: 'Welcome to the official MetaWiki community forums! Here we explore non-dual perception, Dr. David R. Hawkins\' consciousness calibrations, Hermetic mechanics, and perennial philosophy. Feel free to start a discussion or leave a reply.',
-    repliesCount: 3,
+    repliesCount: 1,
     upvotes: 42,
     timestamp: 'Just now',
     repliesList: [
       {
+        id: 'reply-init-1',
         author: 'Campton',
         avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-        body: 'All posts, replies, and upvotes are linked directly to your authenticated Discord user profile.',
+        body: 'All posts, replies, and upvotes are linked directly to your authenticated user profile.',
         time: 'Just now'
       }
     ]
@@ -49,15 +50,16 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Welcome to the MetaWiki community discussions. Share your insights on Hawkins consciousness calibrations, Hermetic principles, or Advaita Vedanta traditions.',
-      repliesCount: 3,
+      repliesCount: 1,
       upvotes: 24,
-      timestamp: '1 hours ago',
+      timestamp: '1 hour ago',
       repliesList: [
         {
+          id: 'reply-init-2',
           author: 'Campton',
           avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-          body: 'All posts and comments are linked directly to your authenticated Discord user profile.',
-          time: '1 hours ago'
+          body: 'All posts and comments are linked directly to your authenticated user profile.',
+          time: '1 hour ago'
         }
       ]
     },
@@ -69,15 +71,16 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'How do you experience the perceptual shift when transitioning from analytical reasoning (LoC 400) to heart-centered surrender (LoC 500+)? Would love community insights on silent meditation protocols.',
-      repliesCount: 5,
+      repliesCount: 1,
       upvotes: 18,
       timestamp: '2 hours ago',
       repliesList: [
         {
+          id: 'reply-init-3',
           author: 'Campton',
           avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
           body: 'The key shift is from analyzing content to resting as the space of awareness itself.',
-          time: '1 hours ago'
+          time: '1 hour ago'
         }
       ]
     },
@@ -89,7 +92,7 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Exploring how Carl Jung’s transcendent function mirrors the Divine Logos of Hellenistic philosophy and Neoplatonism in active imagination work.',
-      repliesCount: 4,
+      repliesCount: 0,
       upvotes: 31,
       timestamp: '3 hours ago',
       repliesList: []
@@ -102,7 +105,7 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Examining Adi Shankara’s Vivekacudamani on the subtle distinction between the sakshin (witnessing self) and the non-dual unmanifest Brahman.',
-      repliesCount: 2,
+      repliesCount: 0,
       upvotes: 29,
       timestamp: '4 hours ago',
       repliesList: []
@@ -115,7 +118,7 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'How sacred geometry encapsulates harmonic ratios found across crystal lattices, planetary orbits, and subtle body energetic meridians.',
-      repliesCount: 6,
+      repliesCount: 0,
       upvotes: 42,
       timestamp: '5 hours ago',
       repliesList: []
@@ -128,7 +131,7 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Discussing Dr. David R. Hawkins’ calibrations of world spiritual scriptures and how their core essence converges across traditions.',
-      repliesCount: 8,
+      repliesCount: 0,
       upvotes: 53,
       timestamp: '6 hours ago',
       repliesList: []
@@ -141,7 +144,7 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Analyzing "As above, so below; as within, so without" through the lens of non-local entanglement and fractal holographic cosmology.',
-      repliesCount: 7,
+      repliesCount: 0,
       upvotes: 39,
       timestamp: '7 hours ago',
       repliesList: []
@@ -150,14 +153,31 @@
 
   function getTopicsList() {
     if (!window.METAWIKI_DATA) window.METAWIKI_DATA = {};
+    
+    // Load local stored topics from localStorage
+    let storedTopics = [];
+    try {
+      storedTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
+    } catch(e) {}
+
     if (!window.METAWIKI_DATA.forumTopics || window.METAWIKI_DATA.forumTopics.length === 0) {
-      window.METAWIKI_DATA.forumTopics = DEFAULT_AUTHENTIC_TOPICS;
+      window.METAWIKI_DATA.forumTopics = [...storedTopics, ...DEFAULT_AUTHENTIC_TOPICS];
     }
     return window.METAWIKI_DATA.forumTopics;
   }
 
+  function cleanCategoryName(cat) {
+    if (!cat) return 'Metaphysical Debate';
+    return String(cat).replace(/^r\//i, '').trim();
+  }
+
+  function cleanUsername(name) {
+    if (!name) return 'Campton';
+    return String(name).replace(/^u\//i, '').replace(/^@/, '').trim();
+  }
+
   function ensureForumModalsExist() {
-    // 1. Reddit Thread Reader Modal Overlay
+    // 1. Thread Reader Modal Overlay
     let threadModal = document.getElementById('forumThreadModal');
     if (!threadModal) {
       threadModal = document.createElement('div');
@@ -172,21 +192,21 @@
     threadModal.innerHTML = `
       <div class="reddit-thread-container" style="max-width: 940px; width: 94%; margin: 1rem auto; background: #0f111a; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 14px; box-shadow: 0 25px 70px rgba(0,0,0,0.95); font-family: var(--font-sans-wiki); overflow: hidden; display: flex; flex-direction: column;">
         
-        <!-- REDDIT SUBREDDIT / TOPIC HEADER -->
-        <div style="padding: 0.8rem 1.4rem; background: #161924; border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;">
+        <!-- TOPIC HEADER BAR -->
+        <div style="padding: 0.85rem 1.4rem; background: #161924; border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <span id="threadCategoryPill" style="font-size: 0.78rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); padding: 0.25rem 0.75rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">r/Metaphysics</span>
+            <span id="threadCategoryPill" style="font-size: 0.78rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); padding: 0.25rem 0.75rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;">Metaphysical Debate</span>
             <span style="color: #64748b; font-size: 0.82rem;">• Posted by</span>
             <div style="display: flex; align-items: center; gap: 0.45rem;">
               <img id="threadAuthorAvatar" src="https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #fbbf24;" alt="Author">
-              <span id="threadAuthorName" style="color: #ffffff; font-weight: 700; font-size: 0.88rem;">u/Campton</span>
+              <span id="threadAuthorName" style="color: #ffffff; font-weight: 700; font-size: 0.88rem;">@Campton</span>
             </div>
             <span id="threadTime" style="color: #64748b; font-size: 0.8rem;">Today</span>
           </div>
           <button id="closeForumThreadModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0.2rem; line-height: 1;" title="Close (Esc)">✕</button>
         </div>
 
-        <!-- REDDIT MAIN THREAD BODY & VOTING COLUMN -->
+        <!-- MAIN THREAD BODY & VOTING COLUMN -->
         <div style="display: flex; padding: 1.6rem; gap: 1.4rem; background: #0f111a;">
           
           <!-- LEFT VOTING COLUMN -->
@@ -205,7 +225,7 @@
             <h1 id="threadTitle" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.75rem; font-weight: 800; margin: 0 0 1rem 0; line-height: 1.35; letter-spacing: -0.01em;">Discussion Title</h1>
             <div id="threadBody" style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.7; white-space: pre-wrap; margin-bottom: 1.6rem; font-family: var(--font-sans-wiki);">Post body content...</div>
 
-            <!-- REDDIT INTERACTIVE ACTION BAR -->
+            <!-- INTERACTIVE ACTION BAR -->
             <div style="display: flex; align-items: center; gap: 0.85rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); margin-bottom: 1.8rem; flex-wrap: wrap;">
               <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 0.45rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; gap: 0.45rem; cursor: pointer;">
                 <i class="ph ph-chat-teardrop-dots" style="color: #a855f7; font-size: 1rem;"></i> <span id="threadRepliesHeaderCount">Replies (0)</span>
@@ -218,21 +238,29 @@
               </button>
             </div>
 
-            <!-- REDDIT COMMENT INPUT AREA -->
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 1.1rem; margin-bottom: 2rem;">
-              <div style="font-size: 0.82rem; color: #94a3b8; font-weight: 700; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
-                <span>Comment as</span>
-                <span id="commentAsUserLabel" style="color: #ffffff; font-weight: 800;">u/Campton</span>
+            <!-- SLEEK REDDIT-STYLE COMMENT INPUT BOX -->
+            <div class="sleek-comment-box-wrapper" style="background: rgba(20, 22, 34, 0.85); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 1.2rem; margin-bottom: 2.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: border-color 0.25s ease;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <img id="commentUserAvatar" src="https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--mw-gold);" alt="Avatar">
+                  <span style="font-size: 0.82rem; color: #94a3b8; font-weight: 700;">Comment as <strong id="commentAsUserLabel" style="color: #ffffff; font-weight: 800;">@Campton</strong></span>
+                </div>
+                <span style="font-size: 0.75rem; color: #64748b;">Press <kbd style="background: rgba(255,255,255,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; color: #cbd5e1; font-family: monospace;">Ctrl + Enter</kbd> to submit</span>
               </div>
-              <textarea id="threadReplyInput" style="width: 100%; height: 90px; padding: 0.75rem 0.85rem; background: #000000; border: 1px solid rgba(255,255,255,0.22); border-radius: 8px; color: #ffffff; font-size: 0.92rem; outline: none; font-family: var(--font-sans-wiki); resize: vertical; line-height: 1.5;" placeholder="What are your metaphysical contemplations on this topic?"></textarea>
-              <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem;">
-                <button id="submitThreadReplyBtn" style="padding: 0.6rem 1.5rem; background: #a855f7; color: #ffffff; border: none; border-radius: 20px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 0.45rem; transition: background 0.2s ease; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);">
-                  <i class="ph ph-paper-plane-right"></i> Comment
+              
+              <textarea id="threadReplyInput" style="width: 100%; height: 95px; padding: 0.85rem; background: #070913; border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; color: #ffffff; font-size: 0.95rem; outline: none; font-family: var(--font-sans-wiki); resize: vertical; line-height: 1.6; transition: border-color 0.2s ease, box-shadow 0.2s ease;" placeholder="What are your metaphysical contemplations on this topic?"></textarea>
+              
+              <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0.85rem; gap: 0.75rem;">
+                <span id="commentStatusMsg" style="font-size: 0.8rem; color: #4ade80; opacity: 0; transition: opacity 0.3s ease; font-weight: 700; display: flex; align-items: center; gap: 0.3rem;">
+                  <i class="ph ph-check-circle"></i> Comment posted!
+                </span>
+                <button id="submitThreadReplyBtn" style="padding: 0.65rem 1.6rem; background: linear-gradient(135deg, #a855f7, #7e22ce); color: #ffffff; border: none; border-radius: 20px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.25s ease; box-shadow: 0 4px 16px rgba(168, 85, 247, 0.4);">
+                  <i class="ph ph-paper-plane-right" style="font-size: 1.05rem;"></i> Comment
                 </button>
               </div>
             </div>
 
-            <!-- REDDIT COMMENT TREE CONTAINER -->
+            <!-- COMMENT TREE CONTAINER -->
             <div id="threadRepliesContainer" style="display: flex; flex-direction: column; gap: 0.9rem;">
               <!-- Dynamically rendered replies -->
             </div>
@@ -319,16 +347,20 @@
     const body = document.getElementById('threadBody');
     const upvotesCount = document.getElementById('threadUpvoteCount');
     const commentUserLabel = document.getElementById('commentAsUserLabel');
+    const commentUserAvatar = document.getElementById('commentUserAvatar');
 
     const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
-    if (commentUserLabel) commentUserLabel.textContent = `u/${session ? session.username : 'Campton'}`;
+    const activeUsername = session ? session.username : 'Campton';
+    const activeAvatar = session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
 
-    const catName = topic.category || 'Metaphysical Debate';
-    if (category) category.textContent = catName.startsWith('r/') ? catName : `r/${catName.replace(/\s+/g, '')}`;
+    if (commentUserLabel) commentUserLabel.textContent = `@${cleanUsername(activeUsername)}`;
+    if (commentUserAvatar) commentUserAvatar.src = activeAvatar;
+
+    if (category) category.textContent = cleanCategoryName(topic.category);
     if (title) title.textContent = topic.title;
     if (time) time.textContent = topic.time || topic.timestamp || 'Recently';
     if (authorAvatar) authorAvatar.src = topic.avatar || 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
-    if (authorName) authorName.textContent = `u/${topic.author || 'Campton'}`;
+    if (authorName) authorName.textContent = `@${cleanUsername(topic.author)}`;
     if (body) body.textContent = topic.body;
 
     let storedVotes = {};
@@ -336,8 +368,16 @@
     const userVote = storedVotes[topic.id] || 0;
     if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + userVote;
 
-    // Fetch comments from Supabase if available
-    if (window.METAWIKI_FORUM_SERVICE && String(topic.id).includes('-')) {
+    // Load locally saved replies from localStorage if any
+    try {
+      const localCommentsMap = JSON.parse(localStorage.getItem('metawiki_local_comments')) || {};
+      if (localCommentsMap[topic.id] && localCommentsMap[topic.id].length > 0) {
+        topic.repliesList = localCommentsMap[topic.id];
+      }
+    } catch(e) {}
+
+    // Fetch live replies from Supabase backend if available
+    if (window.METAWIKI_FORUM_SERVICE) {
       try {
         const supaComments = await window.METAWIKI_FORUM_SERVICE.fetchComments(topic.id);
         if (supaComments && supaComments.length > 0) {
@@ -359,7 +399,7 @@
     if (countHeader) countHeader.textContent = `Replies (${replies.length})`;
 
     if (replies.length === 0) {
-      container.innerHTML = `<div style="color: var(--mw-text-muted); font-size: 0.88rem; font-style: italic; text-align: center; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">No responses yet. Be the first to share your contemplation!</div>`;
+      container.innerHTML = `<div style="color: var(--mw-text-muted); font-size: 0.88rem; font-style: italic; text-align: center; padding: 1.6rem; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">No responses yet. Be the first to share your contemplation!</div>`;
       return;
     }
 
@@ -368,7 +408,7 @@
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem;">
           <div style="display: flex; align-items: center; gap: 0.55rem;">
             <img src="${r.avatar || 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256'}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.25);" alt="Avatar">
-            <span style="font-weight: 700; color: #f2f3f5; font-size: 0.88rem;">u/${r.author}</span>
+            <span style="font-weight: 700; color: #f2f3f5; font-size: 0.88rem;">@${cleanUsername(r.author)}</span>
           </div>
           <span style="font-size: 0.72rem; color: #64748b;">${r.time || 'Just now'}</span>
         </div>
@@ -449,35 +489,85 @@
       };
     }
 
-    if (submitReplyBtn && replyInput) {
-      submitReplyBtn.onclick = async () => {
-        const text = replyInput.value.trim();
-        if (!text || !activeThreadTopicId) return;
+    // Optimistic Comment Submission Engine
+    async function submitCommentOptimistically() {
+      if (!replyInput || !activeThreadTopicId) return;
 
-        const topics = getTopicsList();
-        const topic = topics.find(t => t.id === activeThreadTopicId);
-        if (!topic) return;
+      const text = replyInput.value.trim();
+      if (!text) {
+        replyInput.focus();
+        replyInput.style.borderColor = '#ef4444';
+        setTimeout(() => { replyInput.style.borderColor = 'rgba(255,255,255,0.18)'; }, 1200);
+        return;
+      }
 
-        let commentObj = {
-          author: 'Campton',
-          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-          body: text,
-          time: 'Just now'
-        };
+      const topics = getTopicsList();
+      const topic = topics.find(t => String(t.id) === String(activeThreadTopicId));
+      if (!topic) return;
 
-        if (window.METAWIKI_FORUM_SERVICE) {
-          try {
-            commentObj = await window.METAWIKI_FORUM_SERVICE.createComment(activeThreadTopicId, text);
-          } catch(e) {}
+      const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
+      const authorName = session ? session.username : 'Campton';
+      const authorAvatar = session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
+
+      const newComment = {
+        id: 'reply-' + Date.now(),
+        author: authorName,
+        avatar: authorAvatar,
+        handle: `@${cleanUsername(authorName)}`,
+        body: text,
+        time: 'Just now'
+      };
+
+      // 1. INSTANT OPTIMISTIC FRONT-END UPDATE
+      topic.repliesList = topic.repliesList || [];
+      topic.repliesList.push(newComment);
+      topic.repliesCount = topic.repliesList.length;
+
+      replyInput.value = '';
+      renderThreadReplies(topic);
+      renderForums();
+
+      // Show temporary success feedback
+      const statusMsg = document.getElementById('commentStatusMsg');
+      if (statusMsg) {
+        statusMsg.style.opacity = '1';
+        setTimeout(() => { statusMsg.style.opacity = '0'; }, 2200);
+      }
+
+      // Smooth scroll to newly added comment
+      const container = document.getElementById('threadRepliesContainer');
+      if (container && container.lastElementChild) {
+        container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // 2. BACKEND PERSISTENCE & ASYNC API SYNC
+      try {
+        let localComments = {};
+        try { localComments = JSON.parse(localStorage.getItem('metawiki_local_comments')) || {}; } catch(e){}
+        localComments[topic.id] = topic.repliesList;
+        localStorage.setItem('metawiki_local_comments', JSON.stringify(localComments));
+      } catch(e){}
+
+      if (window.METAWIKI_FORUM_SERVICE) {
+        try {
+          window.METAWIKI_FORUM_SERVICE.createComment(topic.id, text).catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    if (submitReplyBtn) {
+      submitReplyBtn.onclick = (e) => {
+        e.preventDefault();
+        submitCommentOptimistically();
+      };
+    }
+
+    if (replyInput) {
+      replyInput.onkeydown = (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          submitCommentOptimistically();
         }
-
-        topic.repliesList = topic.repliesList || [];
-        topic.repliesList.push(commentObj);
-        topic.repliesCount = topic.repliesList.length;
-
-        replyInput.value = '';
-        renderThreadReplies(topic);
-        renderForums();
       };
     }
   }
@@ -519,31 +609,40 @@
         publishBtn.disabled = true;
         publishBtn.innerHTML = `<i class="ph ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Publishing...`;
 
-        let newTopic = null;
-        if (window.METAWIKI_FORUM_SERVICE) {
-          try {
-            newTopic = await window.METAWIKI_FORUM_SERVICE.createPost(title, category, body);
-          } catch(e) {}
-        }
+        const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
+        const authorName = session ? session.username : 'Campton';
+        const authorAvatar = session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
 
-        if (!newTopic) {
-          const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
-          newTopic = {
-            id: 'topic-' + Date.now(),
-            title: title,
-            category: category,
-            author: session ? session.username : 'Campton',
-            avatar: session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-            body: body,
-            repliesCount: 0,
-            upvotes: 1,
-            timestamp: 'Just now',
-            repliesList: []
-          };
-        }
+        const newTopic = {
+          id: 'topic-' + Date.now(),
+          title: title,
+          category: cleanCategoryName(category),
+          author: authorName,
+          avatar: authorAvatar,
+          handle: `@${cleanUsername(authorName)}`,
+          body: body,
+          repliesCount: 0,
+          upvotes: 1,
+          timestamp: 'Just now',
+          repliesList: []
+        };
 
         const topics = getTopicsList();
         topics.unshift(newTopic);
+
+        // Store local topics in localStorage
+        try {
+          const localTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
+          localTopics.unshift(newTopic);
+          localStorage.setItem('metawiki_local_forum_topics', JSON.stringify(localTopics));
+        } catch(e) {}
+
+        // Async sync with Supabase Forum Service
+        if (window.METAWIKI_FORUM_SERVICE) {
+          try {
+            window.METAWIKI_FORUM_SERVICE.createPost(title, category, body).catch(() => {});
+          } catch(e) {}
+        }
 
         if (titleInput) titleInput.value = '';
         if (bodyInput) bodyInput.value = '';
@@ -610,7 +709,6 @@
       });
     }
 
-    // Always fallback to showing all topics if filtering returns 0 items
     if (filtered.length === 0) {
       filtered = allTopics;
     }
@@ -637,7 +735,7 @@
 
           <div style="flex: 1;">
             <div class="forum-topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span class="forum-category-pill" style="font-size: 0.76rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.2rem 0.65rem; border-radius: 20px;">r/${(t.category || 'General').replace(/\s+/g, '')}</span>
+              <span class="forum-category-pill" style="font-size: 0.76rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.2rem 0.65rem; border-radius: 20px;">${cleanCategoryName(t.category)}</span>
               <span style="font-size: 0.78rem; color: var(--mw-text-muted);">${t.timestamp || t.time || 'Recently'}</span>
             </div>
             <div class="forum-topic-title" style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.4rem;">${t.title}</div>
@@ -645,7 +743,7 @@
             <div class="forum-topic-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.6rem;">
               <div class="forum-topic-author" style="display: flex; align-items: center; gap: 0.45rem;">
                 <img src="${t.avatar || 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256'}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.25);" alt="Avatar">
-                <span style="font-weight: 700; color: #f2f3f5; font-size: 0.84rem;">u/${t.author || 'Campton'}</span>
+                <span style="font-weight: 700; color: #f2f3f5; font-size: 0.84rem;">@${cleanUsername(t.author)}</span>
               </div>
               <div style="display: flex; gap: 1rem; color: var(--mw-gold); font-weight: bold; font-size: 0.85rem;">
                 <span>💬 ${t.repliesCount || (t.repliesList ? t.repliesList.length : 0)} replies</span>
@@ -721,7 +819,6 @@
 
   window.initForums = initForums;
 
-  // Run automatically when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initForums);
   } else {

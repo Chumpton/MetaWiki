@@ -618,14 +618,9 @@
 
       const targetScrollTop = Math.round(currentStage * stageHeight);
       
-      driver.scrollTo({
-        top: targetScrollTop,
-        behavior: 'smooth'
-      });
-
-      // Dispatch scroll event so React canvas updates 3D scene animation
+      driver.scrollTop = targetScrollTop;
       driver.dispatchEvent(new Event('scroll'));
-    }, 5000);
+    }, 4000);
   }
 
   function setupScrollHideHeader() {

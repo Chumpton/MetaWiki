@@ -92,16 +92,44 @@
 
     const defaultMessagesByChannel = {
       general: [
-        { author: "EgoDissolver#9999", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80", time: "10:14 AM", text: "Welcome seekers! Anyone contemplating Gospel of Thomas today?", role: "Non-Dual Observer (LoC 600+)" },
-        { author: "Sophia_Lover#4040", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80", time: "10:18 AM", text: "The Hawkins LoC 700 calibration on Hesychasm is spot on. Pure Tabor light contemplation.", role: "Ascended Luminary (LoC 700+)" }
-      ],
-      hawkins: [
-        { author: "CalibrationAdept#1008", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80", time: "09:45 AM", text: "Notice how transitioning from intellect (LoC 400) to spiritual love (LoC 540) shifts perception from linear to field dynamics.", role: "Intellectual Adept (LoC 400)" }
-      ],
-      hermetic: [
-        { author: "KybalionInitiate#7777", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80", time: "08:30 AM", text: "Principle of Polarity: 'Opposites are identical in nature, but different in degree.'", role: "Hermetic Initiate (LoC 540)" }
+        { 
+          author: "Campton", 
+          avatar: "https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256", 
+          time: "Today at 10:14 AM", 
+          text: "Welcome to the official 🌌 Meta Wiki Discord server! Feel free to share metaphysical contemplations and research here." 
+        },
+        { 
+          author: "Campton", 
+          avatar: "https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256", 
+          time: "Today at 10:20 AM", 
+          text: "Join our official Discord community directly via https://discord.gg/sZwwXgR5vf !" 
+        }
       ]
     };
+
+    async function fetchRealDiscordServerData() {
+      try {
+        const res = await fetch('https://discord.com/api/v10/invites/sZwwXgR5vf?with_counts=true');
+        if (res.ok) {
+          const data = await res.json();
+          const onlineCount = data.approximate_presence_count || 1;
+          const memberCount = data.approximate_member_count || 10;
+          const channelName = data.channel?.name || '💬│general';
+
+          const drawerHeader = document.querySelector('#liveChatDrawer .live-chat-header');
+          if (drawerHeader) {
+            const onlineBadge = drawerHeader.querySelector('span[style*="23a55a"]');
+            if (onlineBadge) {
+              onlineBadge.innerHTML = `<span style="width: 6px; height: 6px; border-radius: 50%; background: #23a55a; display: inline-block;"></span> ${onlineCount} Online (${memberCount} Members)`;
+            }
+            const chanNameEl = drawerHeader.querySelector('span[style*="f2f3f5"]');
+            if (chanNameEl) chanNameEl.textContent = channelName;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch live Discord server invite data:', e);
+      }
+    }
 
     function getMessages() {
       try {
@@ -177,22 +205,24 @@
 
       const auth = window.METAWIKI_AUTH || window.METAWIKI_DISCORD_BACKEND;
       const session = auth ? auth.getSession() : null;
-      const author = session ? session.fullHandle : 'GnosticSeeker#1008';
-      const avatar = session ? session.avatar : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
-      const role = session ? session.role : 'Initiatory Seeker (LoC 200+)';
+      const author = session ? session.username : 'GuestInitiate';
+      const avatar = session ? session.avatar : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
       const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeStr = 'Today at ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      const msgObj = { author, avatar, role, time: timeStr, text };
+      const msgObj = { author, avatar, time: timeStr, text };
       saveMessage(msgObj);
       input.value = '';
       renderMessages();
     }
 
+    fetchRealDiscordServerData();
+
     if (launcher && drawer) {
       launcher.addEventListener('click', () => {
         drawer.style.display = drawer.style.display === 'none' || !drawer.style.display ? 'flex' : 'none';
+        fetchRealDiscordServerData();
         renderUserBanner();
         renderMessages();
       });

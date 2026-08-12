@@ -33,8 +33,8 @@
           </div>
 
           <!-- JOIN OFFICIAL DISCORD SERVER CTA BUTTON -->
-          <a href="https://discord.gg/metawiki" target="_blank" id="joinGuildBtn" style="padding: 0.75rem; background: #5865F2; color: #ffffff; text-decoration: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 0.45rem; margin-bottom: 1.3rem; transition: background 0.2s ease; box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3);">
-            <i class="ph ph-discord-logo" style="font-size: 1.25rem;"></i> Join MetaWiki Discord Guild
+          <a href="https://discord.gg/sZwwXgR5vf" target="_blank" id="joinGuildBtn" style="padding: 0.75rem; background: #5865F2; color: #ffffff; text-decoration: none; border-radius: 9px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 0.45rem; margin-bottom: 1.3rem; transition: background 0.2s ease; box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3);">
+            <i class="ph ph-discord-logo" style="font-size: 1.25rem;"></i> Join 🌌 Meta Wiki Discord Guild
           </a>
 
           <!-- MEMBER BIO EDIT AREA -->

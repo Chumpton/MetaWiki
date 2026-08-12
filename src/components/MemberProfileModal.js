@@ -1,7 +1,7 @@
 /**
  * MetaWiki - High-Contrast Member Profile Modal Component
- * Displays member profile details, Discord avatar, Level counter & EXP progress bar,
- * and high-visibility text styling for bio editing.
+ * Displays authentic Discord user details, profile avatar, Level counter & EXP progress bar,
+ * 1-click Discord Guild server join link, and high-visibility bio editor.
  */
 
 (function (window) {
@@ -23,17 +23,17 @@
               <img id="profileModalAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #fbbf24; box-shadow: 0 0 14px rgba(251, 191, 36, 0.35);" alt="Discord Profile Picture">
               <div>
                 <div style="display: flex; align-items: center; gap: 0.45rem;">
-                  <h3 id="profileModalUsername" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; margin: 0; letter-spacing: -0.01em;">GnosticSeeker</h3>
+                  <h3 id="profileModalUsername" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.3rem; font-weight: 800; margin: 0; letter-spacing: -0.01em;">Discord Member</h3>
                   <span style="font-size: 0.72rem; color: #4ade80; background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.35); padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.2rem;"><i class="ph ph-check-circle"></i> Verified</span>
                 </div>
-                <div id="profileModalHandle" style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; font-weight: 500;">GnosticSeeker#1008</div>
+                <div id="profileModalHandle" style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.2rem; font-weight: 500;">@discord</div>
               </div>
             </div>
             <button id="closeProfileModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; padding: 0.2rem; line-height: 1;">✕</button>
           </div>
 
           <!-- MEMBER LEVEL & EXP PROGRESS CARD -->
-          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 0.9rem 1.1rem; margin-bottom: 1.3rem;">
+          <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 0.9rem 1.1rem; margin-bottom: 1.2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span id="profileModalLevelBadge" style="font-size: 0.78rem; font-weight: 800; color: #fbbf24; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.35); padding: 0.15rem 0.6rem; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Level 700</span>
@@ -52,6 +52,11 @@
               <span id="profileModalExpNext">750 EXP to Level 701</span>
             </div>
           </div>
+
+          <!-- JOIN OFFICIAL DISCORD SERVER CTA BUTTON -->
+          <a href="https://discord.gg/metawiki" target="_blank" id="joinGuildBtn" style="padding: 0.65rem; background: #5865F2; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.45rem; margin-bottom: 1.2rem; transition: background 0.2s ease;">
+            <i class="ph ph-discord-logo" style="font-size: 1.15rem;"></i> Join MetaWiki Discord Guild
+          </a>
 
           <!-- MEMBER BIO EDIT AREA -->
           <div style="margin-bottom: 1.3rem;">
@@ -94,18 +99,18 @@
       const session = auth ? auth.getSession() : null;
       if (!session) return;
 
-      const level = session.hawkinsLoC || 700;
+      const level = session.level || session.hawkinsLoC || 700;
       let cleanRole = session.role || 'Ascended Luminary';
       if (cleanRole.includes('(')) cleanRole = cleanRole.split('(')[0].trim();
 
       const currentExp = session.exp || Math.floor(level * 20.35);
-      const targetExp = Math.floor((level + 1) * 20.35);
+      const targetExp = session.nextLevelExp || Math.floor((level + 1) * 20.35);
       const pct = Math.min(100, Math.max(10, Math.round((currentExp / targetExp) * 100)));
       const nextExpNeeded = targetExp - currentExp;
 
       if (avatarImg) avatarImg.src = session.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
-      if (usernameEl) usernameEl.textContent = session.username || 'GnosticSeeker';
-      if (handleEl) handleEl.textContent = session.fullHandle || 'GnosticSeeker#1008';
+      if (usernameEl) usernameEl.textContent = session.username || 'Discord Member';
+      if (handleEl) handleEl.textContent = session.fullHandle || '@discord';
       if (levelBadgeEl) levelBadgeEl.textContent = `Level ${level}`;
       if (roleTitleEl) roleTitleEl.textContent = cleanRole;
       if (expRatioEl) expRatioEl.textContent = `${currentExp.toLocaleString()} / ${targetExp.toLocaleString()} EXP`;

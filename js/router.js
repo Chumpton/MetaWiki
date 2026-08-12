@@ -91,6 +91,42 @@
     switchView('forums');
   }
 
+  function getArticleViewsFormatted(articleId, defaultViewsStr) {
+    if (!articleId) return defaultViewsStr || '45,000';
+    try {
+      const storedMap = JSON.parse(localStorage.getItem('metawiki_article_views_map') || '{}');
+      let currentNum = storedMap[articleId];
+      if (currentNum === undefined) {
+        const raw = String(defaultViewsStr || '45000').replace(/\D/g, '');
+        currentNum = parseInt(raw) || Math.floor(40000 + Math.random() * 20000);
+      }
+      return currentNum.toLocaleString();
+    } catch (e) {
+      return defaultViewsStr || '45,000';
+    }
+  }
+
+  function incrementAndGetArticleViews(articleId, defaultViewsStr) {
+    if (!articleId) return defaultViewsStr || '45,000';
+    try {
+      const storedMap = JSON.parse(localStorage.getItem('metawiki_article_views_map') || '{}');
+      let currentNum = storedMap[articleId];
+      if (currentNum === undefined) {
+        const raw = String(defaultViewsStr || '45000').replace(/\D/g, '');
+        currentNum = parseInt(raw) || Math.floor(40000 + Math.random() * 20000);
+      }
+      currentNum += 1;
+      storedMap[articleId] = currentNum;
+      localStorage.setItem('metawiki_article_views_map', JSON.stringify(storedMap));
+      return currentNum.toLocaleString();
+    } catch (e) {
+      return defaultViewsStr || '45,000';
+    }
+  }
+
+  window.getArticleViewsFormatted = getArticleViewsFormatted;
+  window.incrementAndGetArticleViews = incrementAndGetArticleViews;
+
   function loadArticle(articleId) {
     if (!window.METAWIKI_DATA || !window.METAWIKI_DATA.articles || window.METAWIKI_DATA.articles.length === 0) return;
 
@@ -113,6 +149,9 @@
       article = window.METAWIKI_DATA.articles[0];
     }
     if (!article) return;
+
+    // Increment article view count on load
+    const newViewsStr = incrementAndGetArticleViews(article.id, article.views);
 
     if (window.state) window.state.currentArticleId = article.id;
 

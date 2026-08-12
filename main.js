@@ -42,11 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setupHawkinsGuideInteractive();
   }
 
-  // 4. Initialize Forum View Engine
-  if (window.ForumsView && typeof window.ForumsView.initForumView === 'function') {
+  // 4. Initialize Forum Engine
+  if (window.ForumsEngine && typeof window.ForumsEngine.initForums === 'function') {
+    window.ForumsEngine.initForums();
+  } else if (typeof window.initForums === 'function') {
+    window.initForums();
+  } else if (window.ForumsView && typeof window.ForumsView.initForumView === 'function') {
     window.ForumsView.initForumView();
-  } else if (typeof window.initForumEngine === 'function') {
-    window.initForumEngine();
   }
 
   // 5. Initialize Modals Component

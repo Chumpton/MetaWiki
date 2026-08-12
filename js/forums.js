@@ -1,7 +1,7 @@
 /**
  * MetaWiki - Metaphysical Community Forums Engine (Reddit-Style Screen Mode & Feature Set)
  * Full-screen thread reader, left voting sidebar, u/Username author badges,
- * share & save buttons, threaded comments, and Supabase integration.
+ * category bubble feed filtering, share & save buttons, threaded comments, and Supabase integration.
  */
 
 (function(window) {
@@ -16,7 +16,7 @@
     };
   }
 
-  // Initial authentic default topics from server founder Campton
+  // Authentic default community discussion topics across all categories
   const DEFAULT_AUTHENTIC_TOPICS = [
     {
       id: 'topic-init-1',
@@ -26,17 +26,102 @@
       avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
       handle: '@campton',
       body: 'Welcome to the MetaWiki community discussions. Share your insights on Hawkins consciousness calibrations, Hermetic principles, or Advaita Vedanta traditions.',
-      repliesCount: 2,
-      upvotes: 12,
-      timestamp: 'Today',
+      repliesCount: 3,
+      upvotes: 24,
+      timestamp: '1 hours ago',
       repliesList: [
         {
           author: 'Campton',
           avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
           body: 'All posts and comments are linked directly to your authenticated Discord user profile.',
-          time: 'Today'
+          time: '1 hours ago'
         }
       ]
+    },
+    {
+      id: 'topic-init-2',
+      title: 'Transitioning from Intellectual LoC 400s to Direct Observation in Silence',
+      category: 'Meditation Practices',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'How do you experience the perceptual shift when transitioning from analytical reasoning (LoC 400) to heart-centered surrender (LoC 500+)? Would love community insights on silent meditation protocols.',
+      repliesCount: 5,
+      upvotes: 18,
+      timestamp: '2 hours ago',
+      repliesList: [
+        {
+          author: 'Campton',
+          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+          body: 'The key shift is from analyzing content to resting as the space of awareness itself.',
+          time: '1 hours ago'
+        }
+      ]
+    },
+    {
+      id: 'topic-init-3',
+      title: 'Archetypal Symbolism of the Logos in Jungian Active Imagination',
+      category: 'Depth Psychology',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'Exploring how Carl Jung’s transcendent function mirrors the Divine Logos of Hellenistic philosophy and Neoplatonism in active imagination work.',
+      repliesCount: 4,
+      upvotes: 31,
+      timestamp: '3 hours ago',
+      repliesList: []
+    },
+    {
+      id: 'topic-init-4',
+      title: 'The Witnessing Subject vs. The Unmanifest Absolute (Turiyatita)',
+      category: 'Non-Dual Contemplations',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'Examining Adi Shankara’s Vivekacudamani on the subtle distinction between the sakshin (witnessing self) and the non-dual unmanifest Brahman.',
+      repliesCount: 2,
+      upvotes: 29,
+      timestamp: '4 hours ago',
+      repliesList: []
+    },
+    {
+      id: 'topic-init-5',
+      title: 'Geometric Resonance and the Geometry of Metatron’s Cube',
+      category: 'Sacred Mechanics',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'How sacred geometry encapsulates harmonic ratios found across crystal lattices, planetary orbits, and subtle body energetic meridians.',
+      repliesCount: 6,
+      upvotes: 42,
+      timestamp: '5 hours ago',
+      repliesList: []
+    },
+    {
+      id: 'topic-init-6',
+      title: 'Calibrating Classical Texts: The Bhagavad Gita vs. Hermetic Corpus',
+      category: 'Hawkins LoC Debates',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'Discussing Dr. David R. Hawkins’ calibrations of world spiritual scriptures and how their core essence converges across traditions.',
+      repliesCount: 8,
+      upvotes: 53,
+      timestamp: '6 hours ago',
+      repliesList: []
+    },
+    {
+      id: 'topic-init-7',
+      title: 'The Seven Hermetic Principles in Modern Quantum Field Theory',
+      category: 'Hermetic Scholarship',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'Analyzing "As above, so below; as within, so without" through the lens of non-local entanglement and fractal holographic cosmology.',
+      repliesCount: 7,
+      upvotes: 39,
+      timestamp: '7 hours ago',
+      repliesList: []
     }
   ];
 
@@ -54,8 +139,10 @@
       modal = document.createElement('div');
       modal.id = 'forumThreadModal';
       modal.className = 'discord-modal-overlay';
-      modal.style.cssText = 'display: none; z-index: 10000; padding: 2rem 0; overflow-y: auto; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(14px);';
-      document.body.appendChild(modal);
+      if (modal.style) {
+        modal.style.cssText = 'display: none; z-index: 10000; padding: 2rem 0; overflow-y: auto; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(14px);';
+      }
+      if (document.body) document.body.appendChild(modal);
     }
 
     modal.innerHTML = `
@@ -383,6 +470,34 @@
     }
   }
 
+  function setupForumCategoryBubbleFeed() {
+    const bubbleBar = document.getElementById('forumCategoryFeedBar');
+    const showMoreBtn = document.getElementById('showMoreForumsBtn');
+
+    if (bubbleBar) {
+      bubbleBar.querySelectorAll('.category-bubble-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          bubbleBar.querySelectorAll('.category-bubble-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const cat = btn.getAttribute('data-cat') || 'all';
+          if (!window.state) window.state = {};
+          window.state.forumCategory = cat;
+          window.state.forumVisibleCount = 15;
+          renderForums();
+        });
+      });
+    }
+
+    if (showMoreBtn) {
+      showMoreBtn.addEventListener('click', () => {
+        if (!window.state) window.state = {};
+        window.state.forumVisibleCount = (window.state.forumVisibleCount || 15) + 15;
+        renderForums();
+      });
+    }
+  }
+
   function renderForums() {
     const list = document.getElementById('forumTopicsList');
     if (!list) return;
@@ -398,7 +513,22 @@
 
     let filtered = allTopics;
     if (category !== 'all') {
-      filtered = allTopics.filter(t => t.category && t.category.toLowerCase().includes(category.toLowerCase()));
+      const cleanCat = category.toLowerCase().trim();
+      filtered = allTopics.filter(t => {
+        if (!t.category) return false;
+        const cat = t.category.toLowerCase().trim();
+        return cat.includes(cleanCat) || cleanCat.includes(cat);
+      });
+    }
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div style="text-align: center; color: var(--mw-text-muted); font-size: 0.95rem; padding: 3rem 1rem; background: rgba(22, 17, 46, 0.4); border: 1px dashed var(--mw-border); border-radius: 12px; margin-bottom: 2rem;">
+          <i class="ph ph-chat-circle-dots" style="font-size: 2.2rem; color: var(--mw-gold); display: block; margin-bottom: 0.8rem;"></i>
+          No topics found in this category yet. Be the first to start a contemplation!
+        </div>
+      `;
+      return;
     }
 
     const visibleItems = filtered.slice(0, countToDisplay);
@@ -482,6 +612,8 @@
   }
 
   async function initForums() {
+    getTopicsList();
+
     if (window.METAWIKI_FORUM_SERVICE) {
       try {
         const supaPosts = await window.METAWIKI_FORUM_SERVICE.fetchPosts();
@@ -494,6 +626,7 @@
 
     ensureRedditThreadModalExists();
     setupCreateTopicModalEvents();
+    setupForumCategoryBubbleFeed();
     renderForums();
   }
 

@@ -1,6 +1,7 @@
 /**
- * MetaWiki - Metaphysical Community Forums Engine
- * Manages 2,000 discussion topics, stacked bubble category filtering, voting, thread reader modal, and Show More pagination.
+ * MetaWiki - Metaphysical Community Forums Engine (Supabase Integrated)
+ * Linked Discord user profiles, live post creation, reply comments, upvoting,
+ * category filtering, and thread reader modal.
  */
 
 (function(window) {
@@ -15,8 +16,40 @@
     };
   }
 
-  function openForumThreadModal(topicId) {
-    const topics = (window.METAWIKI_DATA && window.METAWIKI_DATA.forumTopics) || [];
+  // Initial authentic default topics from server founder Campton
+  const DEFAULT_AUTHENTIC_TOPICS = [
+    {
+      id: 'topic-init-1',
+      title: 'Contemplating Non-Dual Perception and Consciousness Calibration',
+      category: 'Metaphysical Debate',
+      author: 'Campton',
+      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+      handle: '@campton',
+      body: 'Welcome to the MetaWiki community discussions. Share your insights on Hawkins consciousness calibrations, Hermetic principles, or Advaita Vedanta traditions.',
+      repliesCount: 2,
+      upvotes: 12,
+      timestamp: 'Today',
+      repliesList: [
+        {
+          author: 'Campton',
+          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+          body: 'All posts and comments are linked directly to your authenticated Discord user profile.',
+          time: 'Today'
+        }
+      ]
+    }
+  ];
+
+  function getTopicsList() {
+    if (!window.METAWIKI_DATA) window.METAWIKI_DATA = {};
+    if (!window.METAWIKI_DATA.forumTopics || window.METAWIKI_DATA.forumTopics.length === 0) {
+      window.METAWIKI_DATA.forumTopics = DEFAULT_AUTHENTIC_TOPICS;
+    }
+    return window.METAWIKI_DATA.forumTopics;
+  }
+
+  async function openForumThreadModal(topicId) {
+    const topics = getTopicsList();
     const topic = topics.find(t => t.id === topicId);
     if (!topic) return;
 
@@ -34,13 +67,22 @@
     if (title) title.textContent = topic.title;
     if (category) category.textContent = topic.category;
     if (time) time.textContent = topic.time || topic.timestamp || 'Recently';
-    if (authorAvatar) authorAvatar.src = topic.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80';
-    if (authorName) authorName.textContent = topic.author || 'Seeker#1008';
+    if (authorAvatar) authorAvatar.src = topic.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+    if (authorName) authorName.textContent = topic.author || 'Campton';
     if (body) body.textContent = topic.body;
-    if (upvotesCount) upvotesCount.textContent = topic.upvotes || 24;
+    if (upvotesCount) upvotesCount.textContent = topic.upvotes || 1;
+
+    // Fetch comments from Supabase if available
+    if (window.METAWIKI_FORUM_SERVICE && String(topicId).includes('-')) {
+      try {
+        const supaComments = await window.METAWIKI_FORUM_SERVICE.fetchComments(topicId);
+        if (supaComments && supaComments.length > 0) {
+          topic.repliesList = supaComments;
+        }
+      } catch (e) {}
+    }
 
     renderThreadReplies(topic);
-
     if (modal) modal.style.display = 'flex';
   }
 
@@ -58,13 +100,13 @@
     }
 
     container.innerHTML = replies.map(r => `
-      <div style="background: rgba(22, 17, 46, 0.6); border: 1px solid var(--mw-border); border-radius: 12px; padding: 1rem;">
+      <div style="background: rgba(22, 17, 46, 0.6); border: 1px solid var(--mw-border); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <img src="${r.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" alt="Avatar">
-            <span style="font-weight: 700; color: #e2e8f0; font-size: 0.85rem;">${r.author}</span>
+          <div style="display: flex; align-items: center; gap: 0.55rem;">
+            <img src="${r.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);" alt="Avatar">
+            <span style="font-weight: 700; color: #f2f3f5; font-size: 0.88rem;">${r.author}</span>
           </div>
-          <span style="font-size: 0.72rem; color: var(--mw-text-muted);">${r.time}</span>
+          <span style="font-size: 0.72rem; color: var(--mw-text-muted);">${r.time || 'Just now'}</span>
         </div>
         <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5; margin: 0;">${r.body}</p>
       </div>
@@ -78,45 +120,57 @@
     const submitReplyBtn = document.getElementById('submitThreadReplyBtn');
     const replyInput = document.getElementById('threadReplyInput');
 
-    if (closeBtn && modal) {
-      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    function closeModal() {
+      if (modal) modal.style.display = 'none';
+      activeThreadTopicId = null;
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
     }
 
     if (upvoteBtn) {
       upvoteBtn.addEventListener('click', () => {
-        if (!activeThreadTopicId || !window.METAWIKI_DATA || !window.METAWIKI_DATA.forumTopics) return;
-        const topic = window.METAWIKI_DATA.forumTopics.find(t => t.id === activeThreadTopicId);
+        if (!activeThreadTopicId) return;
+        const topics = getTopicsList();
+        const topic = topics.find(t => t.id === activeThreadTopicId);
         if (topic) {
-          topic.upvotes = (topic.upvotes || 24) + 1;
+          topic.upvotes = (topic.upvotes || 0) + 1;
           const upvotesCount = document.getElementById('threadUpvoteCount');
           if (upvotesCount) upvotesCount.textContent = topic.upvotes;
+          renderForums();
         }
       });
     }
 
     if (submitReplyBtn && replyInput) {
-      submitReplyBtn.addEventListener('click', () => {
+      submitReplyBtn.addEventListener('click', async () => {
         const text = replyInput.value.trim();
-        if (!text || !activeThreadTopicId || !window.METAWIKI_DATA || !window.METAWIKI_DATA.forumTopics) return;
+        if (!text || !activeThreadTopicId) return;
 
-        const topic = window.METAWIKI_DATA.forumTopics.find(t => t.id === activeThreadTopicId);
+        const topics = getTopicsList();
+        const topic = topics.find(t => t.id === activeThreadTopicId);
         if (!topic) return;
 
-        const session = window.METAWIKI_DISCORD_BACKEND ? window.METAWIKI_DISCORD_BACKEND.getSession() : null;
-        const authorName = session ? session.fullHandle : 'GnosticSeeker#1008';
-        const authorAvatar = session ? session.avatar : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
+        let commentObj = {
+          author: 'Campton',
+          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+          body: text,
+          time: 'Just now'
+        };
 
-        if (!topic.repliesList) topic.repliesList = [];
-        topic.repliesList.push({
-          author: authorName,
-          avatar: authorAvatar,
-          time: 'Just now',
-          body: text
-        });
+        if (window.METAWIKI_FORUM_SERVICE) {
+          commentObj = await window.METAWIKI_FORUM_SERVICE.createComment(activeThreadTopicId, text);
+        }
 
-        topic.repliesCount = (topic.repliesCount || 0) + 1;
+        topic.repliesList = topic.repliesList || [];
+        topic.repliesList.push(commentObj);
+        topic.repliesCount = topic.repliesList.length;
+
         replyInput.value = '';
-
         renderThreadReplies(topic);
         renderForums();
       });
@@ -142,7 +196,7 @@
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
     if (publishBtn) {
-      publishBtn.addEventListener('click', () => {
+      publishBtn.addEventListener('click', async () => {
         const title = titleInput ? titleInput.value.trim() : '';
         const category = categorySelect ? categorySelect.value : 'Metaphysical Debate';
         const body = bodyInput ? bodyInput.value.trim() : '';
@@ -152,28 +206,36 @@
           return;
         }
 
-        const session = window.METAWIKI_DISCORD_BACKEND ? window.METAWIKI_DISCORD_BACKEND.getSession() : null;
-        const authorName = session ? session.fullHandle : 'GnosticSeeker#1008';
-        const authorAvatar = session ? session.avatar : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80';
+        publishBtn.disabled = true;
+        publishBtn.innerHTML = `<i class="ph ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Publishing...`;
 
-        const newTopic = {
-          id: 'topic-' + Date.now(),
-          title: title,
-          category: category,
-          author: authorName,
-          avatar: authorAvatar,
-          body: body,
-          repliesCount: 0,
-          upvotes: 1,
-          timestamp: 'Just now',
-          repliesList: []
-        };
+        let newTopic = null;
+        if (window.METAWIKI_FORUM_SERVICE) {
+          newTopic = await window.METAWIKI_FORUM_SERVICE.createPost(title, category, body);
+        } else {
+          const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
+          newTopic = {
+            id: 'topic-' + Date.now(),
+            title: title,
+            category: category,
+            author: session ? session.username : 'Campton',
+            avatar: session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
+            body: body,
+            repliesCount: 0,
+            upvotes: 1,
+            timestamp: 'Just now',
+            repliesList: []
+          };
+        }
 
-        if (!window.METAWIKI_DATA.forumTopics) window.METAWIKI_DATA.forumTopics = [];
-        window.METAWIKI_DATA.forumTopics.unshift(newTopic);
+        const topics = getTopicsList();
+        topics.unshift(newTopic);
 
         if (titleInput) titleInput.value = '';
         if (bodyInput) bodyInput.value = '';
+
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = `Publish Discussion Topic`;
 
         closeModal();
         renderForums();
@@ -181,20 +243,16 @@
     }
   }
 
-  // =========================================================================
-  // FORUMS BUBBLE CATEGORY FEED ENGINE (15 CARDS + SHOW MORE)
-  // =========================================================================
   function renderForums() {
     const list = document.getElementById('forumTopicsList');
-    const showMoreBtn = document.getElementById('showMoreForumsBtn');
-    if (!list || !window.METAWIKI_DATA || !window.METAWIKI_DATA.forumTopics) return;
+    if (!list) return;
 
     let storedVotes = {};
     try {
       storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {};
     } catch(e) {}
 
-    const allTopics = window.METAWIKI_DATA.forumTopics;
+    const allTopics = getTopicsList();
     const category = (window.state && window.state.forumCategory) || 'all';
     const countToDisplay = (window.state && window.state.forumVisibleCount) || 15;
 
@@ -225,18 +283,18 @@
 
           <div style="flex: 1;">
             <div class="forum-topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span class="forum-category-pill">${t.category}</span>
+              <span class="forum-category-pill">${t.category || 'General'}</span>
               <span style="font-size: 0.78rem; color: var(--mw-text-muted);">${t.timestamp || t.time || 'Recently'}</span>
             </div>
             <div class="forum-topic-title">${t.title}</div>
             <div class="forum-topic-body">${t.body}</div>
             <div class="forum-topic-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem;">
-              <div class="forum-topic-author">
-                <div class="forum-author-avatar" style="background: ${t.avatarColor || '#10b981'};">${(t.author || 'S').charAt(0)}</div>
-                <span>${t.author}</span>
+              <div class="forum-topic-author" style="display: flex; align-items: center; gap: 0.45rem;">
+                <img src="${t.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.25);" alt="Avatar">
+                <span style="font-weight: 700; color: #f2f3f5; font-size: 0.84rem;">${t.author || 'Campton'}</span>
               </div>
               <div style="display: flex; gap: 1rem; color: var(--mw-gold); font-weight: bold; font-size: 0.85rem;">
-                <span>💬 ${t.repliesCount || t.replies || 0} replies</span>
+                <span>💬 ${t.repliesCount || (t.repliesList ? t.repliesList.length : 0)} replies</span>
               </div>
             </div>
           </div>
@@ -244,89 +302,38 @@
       `;
     }).join('');
 
-    // Vote button delegation
-    list.querySelectorAll('.vote-up').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const topicId = btn.getAttribute('data-id');
-        const currentVote = storedVotes[topicId] || 0;
-        storedVotes[topicId] = currentVote === 1 ? 0 : 1;
-        localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
-        renderForums();
-      });
-    });
-
-    list.querySelectorAll('.vote-down').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const topicId = btn.getAttribute('data-id');
-        const currentVote = storedVotes[topicId] || 0;
-        storedVotes[topicId] = currentVote === -1 ? 0 : -1;
-        localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
-        renderForums();
-      });
-    });
-
+    // Card click event -> open thread modal
     list.querySelectorAll('.forum-topic-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.vote-btn')) return;
         const topicId = card.getAttribute('data-id');
-        if (topicId) openForumThreadModal(topicId);
+        openForumThreadModal(topicId);
       });
     });
-
-    if (showMoreBtn) {
-      if (countToDisplay >= filtered.length) {
-        showMoreBtn.style.display = 'none';
-      } else {
-        showMoreBtn.style.display = 'inline-flex';
-        showMoreBtn.querySelector('span').textContent = `Show More Discussions (Batch +15)`;
-      }
-    }
   }
 
-  function setupForumCategoryBubbleFeed() {
-    const bubbleBar = document.getElementById('forumCategoryFeedBar');
-    const showMoreBtn = document.getElementById('showMoreForumsBtn');
-
-    if (bubbleBar) {
-      bubbleBar.querySelectorAll('.category-bubble-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
-          bubbleBar.querySelectorAll('.category-bubble-pill').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          const cat = btn.getAttribute('data-cat');
-          if (!window.state) window.state = {};
-          window.state.forumCategory = cat;
-          window.state.forumVisibleCount = 15;
-          renderForums();
-        });
-      });
+  async function initForums() {
+    if (window.METAWIKI_FORUM_SERVICE) {
+      try {
+        const supaPosts = await window.METAWIKI_FORUM_SERVICE.fetchPosts();
+        if (supaPosts && supaPosts.length > 0) {
+          window.METAWIKI_DATA = window.METAWIKI_DATA || {};
+          window.METAWIKI_DATA.forumTopics = supaPosts;
+        }
+      } catch (e) {}
     }
 
-    if (showMoreBtn) {
-      showMoreBtn.addEventListener('click', () => {
-        if (!window.state) window.state = {};
-        window.state.forumVisibleCount = (window.state.forumVisibleCount || 15) + 15;
-        renderForums();
-      });
-    }
-
+    setupCreateTopicModalEvents();
+    setupThreadModalEvents();
     renderForums();
   }
 
-  function initForumEngine() {
-    setupThreadModalEvents();
-    setupCreateTopicModalEvents();
-    setupForumCategoryBubbleFeed();
-  }
+  window.ForumsEngine = {
+    initForums,
+    renderForums,
+    openForumThreadModal
+  };
 
-  // Export Forum API
-  window.openForumThreadModal = openForumThreadModal;
-  window.renderThreadReplies = renderThreadReplies;
-  window.setupThreadModalEvents = setupThreadModalEvents;
-  window.setupCreateTopicModalEvents = setupCreateTopicModalEvents;
-  window.renderForums = renderForums;
-  window.setupForumCategoryBubbleFeed = setupForumCategoryBubbleFeed;
-  window.initForumEngine = initForumEngine;
+  window.initForums = initForums;
 
 })(window);

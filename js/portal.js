@@ -75,35 +75,36 @@
     }
 
     grid.innerHTML = visibleItems.map((a, idx) => {
-      const imgPath = (a.infobox && a.infobox.imagePath) || a.imagePath || 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';
-      const viewsFormatted = window.getArticleViewsFormatted ? window.getArticleViewsFormatted(a.id, a.views) : (a.views || '45,000');
+        const rawPath = (a.infobox && a.infobox.imagePath) || a.imagePath;
+        const imgPath = window.getWikiImgUrl ? window.getWikiImgUrl(rawPath, 330) : 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';
+        const viewsFormatted = window.getArticleViewsFormatted ? window.getArticleViewsFormatted(a.id) : (a.views || '0');
 
-      return `
-        <div class="triadic-card concept-feed-card" data-wiki="${a.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s; cursor: pointer;">
-          <div>
-            <div class="triadic-thumbnail-pic" style="overflow: hidden; height: 170px; position: relative; border-radius: 10px;">
-              <img src="${imgPath}" alt="${a.title}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
-              
-              <!-- THUMBNAIL CATEGORY BADGE -->
-              <span style="position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.65rem; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--mw-gold); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--mw-gold); backdrop-filter: blur(4px);">
-                ${a.category || 'Metaphysics'}
-              </span>
+        return `
+          <div class="triadic-card concept-feed-card" data-wiki="${a.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s; cursor: pointer;">
+            <div>
+              <div class="triadic-thumbnail-pic" style="overflow: hidden; height: 170px; position: relative; border-radius: 10px;">
+                <img src="${imgPath}" alt="${a.title}" referrerpolicy="no-referrer" onerror="if(window.handleCardImgError){window.handleCardImgError(this,'${(a.title||'').replace(/'/g,"\\\'")}');}else{this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
+                
+                <!-- THUMBNAIL CATEGORY BADGE -->
+                <span style="position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.65rem; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--mw-gold); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--mw-gold); backdrop-filter: blur(4px);">
+                  ${a.category || 'Metaphysics'}
+                </span>
+              </div>
+              <div class="triadic-card-title" style="margin-top: 0.8rem;">${a.title}</div>
+              <div class="triadic-card-summary" style="font-size: 0.82rem; color: var(--mw-text-muted); line-height: 1.4; margin-top: 0.4rem;">
+                ${a.shortDescription}
+              </div>
             </div>
-            <div class="triadic-card-title" style="margin-top: 0.8rem;">${a.title}</div>
-            <div class="triadic-card-summary" style="font-size: 0.82rem; color: var(--mw-text-muted); line-height: 1.4; margin-top: 0.4rem;">
-              ${a.shortDescription}
+
+            <div class="triadic-card-footer" style="margin-top: 1rem;">
+              ${createHawkinsRainbowBar(a.hawkinsCalibration || a.hawkinsNumeric)}
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.7rem; font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700;">
+                <span class="card-views-footer" style="color: var(--mw-text-muted); flex-shrink: 0; white-space: nowrap;"><i class="ph ph-eye" style="color: #fbbf24;"></i> ${viewsFormatted} views</span>
+                <span style="color: var(--mw-gold); flex-shrink: 0; white-space: nowrap;">Read Article ➔</span>
+              </div>
             </div>
           </div>
-
-          <div class="triadic-card-footer" style="margin-top: 1rem;">
-            ${createHawkinsRainbowBar(a.hawkinsCalibration || a.hawkinsNumeric)}
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.7rem; font-family: var(--font-heading); font-size: 0.82rem; font-weight: 700;">
-              <span class="card-views-footer" style="color: var(--mw-text-muted); flex-shrink: 0; white-space: nowrap;"><i class="ph ph-eye" style="color: #fbbf24;"></i> ${viewsFormatted} views</span>
-              <span style="color: var(--mw-gold); flex-shrink: 0; white-space: nowrap;">Read Article ➔</span>
-            </div>
-          </div>
-        </div>
-      `;
+        `;
     }).join('');
 
     // Bind Click Handlers to Cards

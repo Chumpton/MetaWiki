@@ -205,7 +205,7 @@
         <div class="featured-card" data-wiki="${card.id}" style="cursor: pointer;">
           <div>
             <div class="featured-card-thumb-wrapper">
-              <img src="${card.infobox.imagePath}" alt="${card.title}" class="featured-card-img" referrerpolicy="no-referrer">
+              <img src="${window.getWikiImgUrl ? window.getWikiImgUrl((card.infobox && card.infobox.imagePath) || card.imagePath, 400) : card.imagePath}" alt="${card.title}" class="featured-card-img" referrerpolicy="no-referrer" onerror="if(window.handleCardImgError){window.handleCardImgError(this,'${(card.title||'').replace(/'/g,"\\\'")}');}else{this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';}">
             </div>
             <div class="featured-card-title">${card.title}</div>
             <div class="featured-card-subtitle">${card.shortDescription}</div>

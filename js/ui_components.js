@@ -669,19 +669,48 @@
       return shortPath;
     }
     const cleanPath = shortPath.replace(/^\/+/, '');
-    const parts = cleanPath.split('/');
-    const fileName = parts[parts.length - 1];
-
-    if (fileName.toLowerCase().endsWith('.svg')) {
-      return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}.png`;
+    
+    if (/^[0-9a-f]\/[0-9a-f]{2}\//i.test(cleanPath)) {
+      const parts = cleanPath.split('/');
+      const fileName = parts[parts.length - 1];
+      if (fileName.toLowerCase().endsWith('.svg')) {
+        return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}.png`;
+      }
+      return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}`;
     }
 
-    return `https://upload.wikimedia.org/wikipedia/commons/thumb/${cleanPath}/${width}px-${fileName}`;
+    return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(cleanPath)}?width=${width}`;
+  }
+
+  function handleCardImgError(imgEl, titleOrTopic) {
+    if (!imgEl || imgEl.dataset.failed) return;
+    imgEl.dataset.failed = 'true';
+
+    const cleanTitle = (titleOrTopic || '').trim();
+    if (!cleanTitle) {
+      imgEl.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';
+      return;
+    }
+
+    fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(cleanTitle)}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        const sourceUrl = data?.thumbnail?.source || data?.originalimage?.source;
+        if (sourceUrl) {
+          imgEl.src = sourceUrl;
+        } else {
+          imgEl.src = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(cleanTitle)}.jpg?width=330`;
+        }
+      })
+      .catch(() => {
+        imgEl.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';
+      });
   }
 
   // Export UI Components API
   window.AVAILABLE_INTEREST_TAGS = AVAILABLE_INTEREST_TAGS;
   window.getWikiImgUrl = getWikiImgUrl;
+  window.handleCardImgError = handleCardImgError;
   window.setupThemeColorController = setupThemeColorController;
   window.setupLiveCommunityChat = setupLiveCommunityChat;
   window.setupSearch = setupSearch;

@@ -20,7 +20,7 @@
       <div class="triadic-card concept-feed-card" data-wiki="${article.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(index % 15) * 0.03}s; cursor: pointer;">
         <div>
           <div class="triadic-thumbnail-pic" style="overflow: hidden; height: 170px; position: relative; border-radius: 10px;">
-            <img src="${imgPath}" alt="${article.title}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
+            <img src="${imgPath}" alt="${article.title}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(window.handleCardImgError){window.handleCardImgError(this,'${(article.title||'').replace(/'/g,"\\\'")}');}else{this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
             
             <span style="position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.65rem; background: rgba(10, 8, 20, 0.85); border: 1px solid var(--mw-gold); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: var(--mw-gold); backdrop-filter: blur(4px);">
               ${article.category || 'Metaphysics'}
@@ -50,13 +50,13 @@
       <div class="featured-card" data-wiki="${article.id}" style="cursor: pointer;">
         <div>
           <div class="featured-card-thumb-wrapper">
-            <img src="${imgPath}" alt="${article.title}" class="featured-card-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';">
+            <img src="${imgPath}" alt="${article.title}" class="featured-card-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(window.handleCardImgError){window.handleCardImgError(this,'${(article.title||'').replace(/'/g,"\\\'")}');}else{this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Plato_Silanion_Musei_Capitolini_MC1377.png/330px-Plato_Silanion_Musei_Capitolini_MC1377.png';}">
           </div>
           <div class="featured-card-title">${article.title}</div>
           <div class="featured-card-subtitle">${article.shortDescription}</div>
         </div>
         <div class="featured-card-link" style="display: flex; align-items: center; justify-content: space-between;">
-          <span class="card-views-footer"><i class="ph ph-eye"></i> ${article.views || '120,000'}</span>
+          <span class="card-views-footer"><i class="ph ph-eye"></i> ${viewsFormatted}</span>
           <div style="display: flex; align-items: center; gap: 0.3rem;">
             <span>Read Article</span> <i class="ph ph-arrow-right"></i>
           </div>
@@ -74,7 +74,7 @@
       <div class="triadic-card guide-feed-card" data-wiki="${guide.wikiId || guide.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(index % 15) * 0.03}s; cursor: pointer;">
         <div>
           <div class="triadic-thumbnail-pic" style="overflow: hidden; height: 160px; position: relative;">
-            <img src="${imgPath}" alt="${guide.title}" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Emerald_Tablet_of_Hermes.jpg/300px-Emerald_Tablet_of_Hermes.jpg';" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
+            <img src="${imgPath}" alt="${guide.title}" referrerpolicy="no-referrer" onerror="if(window.handleCardImgError){window.handleCardImgError(this,'${(guide.title||'').replace(/'/g,"\\\'")}');}else{this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Emerald_Tablet_of_Hermes.jpg/300px-Emerald_Tablet_of_Hermes.jpg';}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px; transition: transform 0.3s ease;">
             <span style="position: absolute; top: 10px; right: 10px; padding: 0.25rem 0.65rem; background: rgba(168, 85, 247, 0.9); border: 1px solid var(--mw-violet); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #fff; backdrop-filter: blur(4px);">
               ${guide.readTime || '10 min'} read
             </span>

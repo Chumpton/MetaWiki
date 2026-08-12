@@ -1,7 +1,7 @@
 /**
- * MetaWiki - Master Unified Authentication Service & Mock Test Adapter
- * Prepared for Discord OAuth2 backend handshake, Supabase Auth integration,
- * Remember Me session persistence, and Vercel serverless deployment.
+ * MetaWiki - Master Unified Authentication Service & Real OAuth Adapter
+ * Supports real live Discord OAuth authorization via Supabase Callback URL,
+ * automatic URL token parsing, Remember Me session persistence, and mock testing presets.
  */
 
 (function (window) {
@@ -55,6 +55,11 @@
       this.supabaseClient = null;
       this.listeners = [];
       this.simulateGuildMembershipCheckPass = true;
+
+      // Automatically check for incoming OAuth callback tokens on load
+      setTimeout(() => {
+        this.parseOAuthCallback();
+      }, 50);
     }
 
     getMockPresets() {
@@ -70,7 +75,7 @@
     }
 
     /**
-     * Retrieve Active User Session (Checks localStorage & sessionStorage for Remember Me)
+     * Retrieve Active User Session (Checks localStorage & sessionStorage)
      */
     getSession() {
       try {
@@ -123,6 +128,79 @@
       }
       this.notify(sessionData);
       window.dispatchEvent(new CustomEvent('metawiki_auth_changed', { detail: sessionData }));
+    }
+
+    /**
+     * Redirect User to Real Live Discord OAuth Authorization Page
+     */
+    startRealDiscordOAuth() {
+      if (typeof window === 'undefined') return;
+      const redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+      const authUrl = `https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/authorize?provider=discord&redirect_to=${redirectUri}`;
+      window.location.href = authUrl;
+    }
+
+    /**
+     * Parse Incoming OAuth Callback Hash Fragments from Supabase/Discord
+     */
+    async parseOAuthCallback() {
+      if (typeof window === 'undefined') return null;
+      const hash = window.location.hash;
+
+      if (hash && hash.includes('access_token')) {
+        try {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const providerToken = params.get('provider_token') || accessToken;
+          const refreshToken = params.get('refresh_token');
+
+          if (accessToken) {
+            let userProfile = null;
+            try {
+              const res = await fetch('https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/user', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+              });
+              if (res.ok) {
+                userProfile = await res.json();
+              }
+            } catch (e) {}
+
+            const meta = userProfile?.user_metadata || {};
+            const username = meta.full_name || meta.name || meta.custom_claims?.global_name || 'GnosticSeeker';
+            const avatarUrl = meta.avatar_url || meta.picture || DEFAULT_AVATARS[0];
+            const discriminator = meta.discriminator || '0001';
+
+            const realSession = {
+              provider: 'discord_live',
+              id: userProfile?.id || ('disc_' + Date.now()),
+              username: username,
+              discriminator: discriminator,
+              fullHandle: `${username}#${discriminator}`,
+              avatar: avatarUrl,
+              hawkinsLoC: 700,
+              level: 700,
+              exp: 14245,
+              nextLevelExp: 14448,
+              role: this.getHawkinsRole(700),
+              isVerified: true,
+              token: accessToken,
+              refreshToken: refreshToken,
+              loggedInAt: new Date().toISOString()
+            };
+
+            this.setSession(realSession, true);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            if (typeof window.openMemberProfileModal === 'function') {
+              setTimeout(() => { window.openMemberProfileModal(); }, 300);
+            }
+            return realSession;
+          }
+        } catch (err) {
+          console.warn('Error parsing OAuth callback:', err);
+        }
+      }
+      return null;
     }
 
     async verifyGuildMembership(discordUserId) {
@@ -243,10 +321,6 @@
         try { cb(session); } catch (e) {}
       });
     }
-
-    /* =========================================================================
-       SUPABASE & VERCEL BACKEND INTEGRATION ADAPTER
-       ========================================================================= */
 
     initSupabase(supabaseUrl, supabaseKey) {
       this.provider = 'supabase';

@@ -1,7 +1,7 @@
 /**
  * MetaWiki Minimalist Discord Authentication Controller
- * Controls optimistic multi-stage Sign Up / Sign In loading, Discord Guild membership check,
- * nav button username display with avatar & level counter, and member profile modal triggers.
+ * Controls live Discord OAuth2 redirection, nav button username display with avatar & level counter,
+ * and member profile modal triggers.
  */
 
 (function () {
@@ -108,32 +108,16 @@
     }
 
     if (confirmBtn) {
-      confirmBtn.addEventListener('click', async () => {
+      confirmBtn.addEventListener('click', () => {
         confirmBtn.disabled = true;
-        const randomAvatar = MOCK_AVATARS[Math.floor(Math.random() * MOCK_AVATARS.length)];
+        confirmBtn.innerHTML = `<i class="ph ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Connecting to Discord...`;
+
         const auth = window.METAWIKI_AUTH;
-
-        try {
-          if (auth && typeof auth.loginDiscordOptimistic === 'function') {
-            await auth.loginDiscordOptimistic('GnosticSeeker', randomAvatar, 700, (stage, msg) => {
-              confirmBtn.innerHTML = `<i class="ph ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> ${msg}`;
-            });
-          } else {
-            window.METAWIKI_DISCORD_BACKEND.login('GnosticSeeker', randomAvatar, 700);
-          }
-
-          confirmBtn.disabled = false;
-          confirmBtn.innerHTML = `<i class="ph ph-discord-logo" style="font-size: 1.4rem;"></i> Sign Up / Sign In with Discord`;
-          window.METAWIKI_DISCORD_BACKEND.closeModal();
-          
-          if (typeof window.openMemberProfileModal === 'function') {
-            window.openMemberProfileModal();
-          }
-
-        } catch (err) {
-          confirmBtn.disabled = false;
-          confirmBtn.innerHTML = `<i class="ph ph-warning"></i> Guild Membership Required`;
-          alert('MetaWiki Discord Guild Membership is required to complete authentication.\n\nPlease join the official Discord server and try again.');
+        if (auth && typeof auth.startRealDiscordOAuth === 'function') {
+          auth.startRealDiscordOAuth();
+        } else {
+          const authUrl = `https://qcqbinlijrzzuvrseyii.supabase.co/auth/v1/authorize?provider=discord&redirect_to=${encodeURIComponent(window.location.origin + window.location.pathname)}`;
+          window.location.href = authUrl;
         }
       });
     }

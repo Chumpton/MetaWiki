@@ -1,7 +1,7 @@
 /**
  * MetaWiki - Metaphysical Community Forums Engine
- * Clean category badges (no r/), handles (no u/), sleek Reddit-style comment box,
- * optimistic front-end comment posting, keyboard Ctrl+Enter submission, and backend API routes.
+ * Single Reddit-style upvote arrow, 1 official Campton test post, clean categories & handles,
+ * sleek comment box, optimistic front-end posting, and persistent backend API routes.
  */
 
 (function(window) {
@@ -16,8 +16,8 @@
     };
   }
 
-  // Official Campton Community Post
-  const OFFICIAL_CAMPTON_MOCK_POST = {
+  // 1 Single Official Test Post from Campton in the backend
+  const OFFICIAL_CAMPTON_TEST_POST = {
     id: 'topic-campton-official',
     title: 'Welcome to MetaWiki Community — Consciousness & Hermetic Contemplations',
     category: 'Metaphysical Debate',
@@ -39,130 +39,22 @@
     ]
   };
 
-  // Authentic default community discussion topics across all categories
   const DEFAULT_AUTHENTIC_TOPICS = [
-    OFFICIAL_CAMPTON_MOCK_POST,
-    {
-      id: 'topic-init-1',
-      title: 'Contemplating Non-Dual Perception and Consciousness Calibration',
-      category: 'Metaphysical Debate',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'Welcome to the MetaWiki community discussions. Share your insights on Hawkins consciousness calibrations, Hermetic principles, or Advaita Vedanta traditions.',
-      repliesCount: 1,
-      upvotes: 24,
-      timestamp: '1 hour ago',
-      repliesList: [
-        {
-          id: 'reply-init-2',
-          author: 'Campton',
-          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-          body: 'All posts and comments are linked directly to your authenticated user profile.',
-          time: '1 hour ago'
-        }
-      ]
-    },
-    {
-      id: 'topic-init-2',
-      title: 'Transitioning from Intellectual LoC 400s to Direct Observation in Silence',
-      category: 'Meditation Practices',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'How do you experience the perceptual shift when transitioning from analytical reasoning (LoC 400) to heart-centered surrender (LoC 500+)? Would love community insights on silent meditation protocols.',
-      repliesCount: 1,
-      upvotes: 18,
-      timestamp: '2 hours ago',
-      repliesList: [
-        {
-          id: 'reply-init-3',
-          author: 'Campton',
-          avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-          body: 'The key shift is from analyzing content to resting as the space of awareness itself.',
-          time: '1 hour ago'
-        }
-      ]
-    },
-    {
-      id: 'topic-init-3',
-      title: 'Archetypal Symbolism of the Logos in Jungian Active Imagination',
-      category: 'Depth Psychology',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'Exploring how Carl Jung’s transcendent function mirrors the Divine Logos of Hellenistic philosophy and Neoplatonism in active imagination work.',
-      repliesCount: 0,
-      upvotes: 31,
-      timestamp: '3 hours ago',
-      repliesList: []
-    },
-    {
-      id: 'topic-init-4',
-      title: 'The Witnessing Subject vs. The Unmanifest Absolute (Turiyatita)',
-      category: 'Non-Dual Contemplations',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'Examining Adi Shankara’s Vivekacudamani on the subtle distinction between the sakshin (witnessing self) and the non-dual unmanifest Brahman.',
-      repliesCount: 0,
-      upvotes: 29,
-      timestamp: '4 hours ago',
-      repliesList: []
-    },
-    {
-      id: 'topic-init-5',
-      title: 'Geometric Resonance and the Geometry of Metatron’s Cube',
-      category: 'Sacred Mechanics',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'How sacred geometry encapsulates harmonic ratios found across crystal lattices, planetary orbits, and subtle body energetic meridians.',
-      repliesCount: 0,
-      upvotes: 42,
-      timestamp: '5 hours ago',
-      repliesList: []
-    },
-    {
-      id: 'topic-init-6',
-      title: 'Calibrating Classical Texts: The Bhagavad Gita vs. Hermetic Corpus',
-      category: 'Hawkins LoC Debates',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'Discussing Dr. David R. Hawkins’ calibrations of world spiritual scriptures and how their core essence converges across traditions.',
-      repliesCount: 0,
-      upvotes: 53,
-      timestamp: '6 hours ago',
-      repliesList: []
-    },
-    {
-      id: 'topic-init-7',
-      title: 'The Seven Hermetic Principles in Modern Quantum Field Theory',
-      category: 'Hermetic Scholarship',
-      author: 'Campton',
-      avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-      handle: '@campton',
-      body: 'Analyzing "As above, so below; as within, so without" through the lens of non-local entanglement and fractal holographic cosmology.',
-      repliesCount: 0,
-      upvotes: 39,
-      timestamp: '7 hours ago',
-      repliesList: []
-    }
+    OFFICIAL_CAMPTON_TEST_POST
   ];
 
   function getTopicsList() {
     if (!window.METAWIKI_DATA) window.METAWIKI_DATA = {};
-    
-    // Load local stored topics from localStorage
-    let storedTopics = [];
-    try {
-      storedTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
-    } catch(e) {}
 
     if (!window.METAWIKI_DATA.forumTopics || window.METAWIKI_DATA.forumTopics.length === 0) {
-      window.METAWIKI_DATA.forumTopics = [...storedTopics, ...DEFAULT_AUTHENTIC_TOPICS];
+      let storedTopics = [];
+      try {
+        storedTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
+      } catch(e) {}
+
+      window.METAWIKI_DATA.forumTopics = storedTopics.length > 0 ? storedTopics : [...DEFAULT_AUTHENTIC_TOPICS];
     }
+
     return window.METAWIKI_DATA.forumTopics;
   }
 
@@ -206,27 +98,23 @@
           <button id="closeForumThreadModalBtn" style="background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; padding: 0.2rem; line-height: 1;" title="Close (Esc)">✕</button>
         </div>
 
-        <!-- MAIN THREAD BODY & VOTING COLUMN -->
+        <!-- MAIN THREAD BODY & ACTION BAR -->
         <div style="display: flex; padding: 1.6rem; gap: 1.4rem; background: #0f111a;">
           
-          <!-- LEFT VOTING COLUMN -->
-          <div style="display: flex; flex-direction: column; align-items: center; gap: 0.35rem; min-width: 44px; padding-top: 0.2rem;">
-            <button id="upvoteThreadBtn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; transition: all 0.2s ease;" title="Upvote">
-              <i class="ph ph-caret-up-bold"></i>
-            </button>
-            <span id="threadUpvoteCount" style="font-weight: 800; font-size: 0.98rem; color: #fbbf24; margin: 0.1rem 0;">42</span>
-            <button id="downvoteThreadBtn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; transition: all 0.2s ease;" title="Downvote">
-              <i class="ph ph-caret-down-bold"></i>
-            </button>
-          </div>
-
           <!-- MAIN THREAD CONTENT COLUMN -->
           <div style="flex: 1; min-width: 0;">
             <h1 id="threadTitle" style="color: #ffffff; font-family: var(--font-heading); font-size: 1.75rem; font-weight: 800; margin: 0 0 1rem 0; line-height: 1.35; letter-spacing: -0.01em;">Discussion Title</h1>
             <div id="threadBody" style="color: #cbd5e1; font-size: 0.98rem; line-height: 1.7; white-space: pre-wrap; margin-bottom: 1.6rem; font-family: var(--font-sans-wiki);">Post body content...</div>
 
-            <!-- INTERACTIVE ACTION BAR -->
+            <!-- ACTION BAR WITH SINGLE REDDIT-STYLE UPVOTE PILL -->
             <div style="display: flex; align-items: center; gap: 0.85rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); margin-bottom: 1.8rem; flex-wrap: wrap;">
+              
+              <!-- SINGLE UPVOTE PILL BUTTON -->
+              <button id="upvoteThreadBtn" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35); color: #a855f7; padding: 0.45rem 1.1rem; border-radius: 20px; font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; gap: 0.45rem; cursor: pointer; transition: all 0.2s ease;" title="Upvote Topic">
+                <i class="ph ph-arrow-fat-up-fill" style="font-size: 1.1rem;"></i>
+                <span id="threadUpvoteCount">42</span>
+              </button>
+
               <button style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 0.45rem 1rem; border-radius: 20px; font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; gap: 0.45rem; cursor: pointer;">
                 <i class="ph ph-chat-teardrop-dots" style="color: #a855f7; font-size: 1rem;"></i> <span id="threadRepliesHeaderCount">Replies (0)</span>
               </button>
@@ -346,6 +234,7 @@
     const authorName = document.getElementById('threadAuthorName');
     const body = document.getElementById('threadBody');
     const upvotesCount = document.getElementById('threadUpvoteCount');
+    const upvoteBtn = document.getElementById('upvoteThreadBtn');
     const commentUserLabel = document.getElementById('commentAsUserLabel');
     const commentUserAvatar = document.getElementById('commentUserAvatar');
 
@@ -367,6 +256,17 @@
     try { storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {}; } catch(e) {}
     const userVote = storedVotes[topic.id] || 0;
     if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + userVote;
+    if (upvoteBtn) {
+      if (userVote === 1) {
+        upvoteBtn.style.background = 'linear-gradient(135deg, #a855f7, #7e22ce)';
+        upvoteBtn.style.color = '#ffffff';
+        upvoteBtn.style.borderColor = '#a855f7';
+      } else {
+        upvoteBtn.style.background = 'rgba(168, 85, 247, 0.15)';
+        upvoteBtn.style.color = '#a855f7';
+        upvoteBtn.style.borderColor = 'rgba(168, 85, 247, 0.35)';
+      }
+    }
 
     // Load locally saved replies from localStorage if any
     try {
@@ -421,7 +321,6 @@
     const modal = document.getElementById('forumThreadModal');
     const closeBtn = document.getElementById('closeForumThreadModalBtn');
     const upvoteBtn = document.getElementById('upvoteThreadBtn');
-    const downvoteBtn = document.getElementById('downvoteThreadBtn');
     const shareBtn = document.getElementById('shareThreadBtn');
     const saveBtn = document.getElementById('saveThreadBtn');
     const submitReplyBtn = document.getElementById('submitThreadReplyBtn');
@@ -432,15 +331,27 @@
       activeThreadTopicId = null;
     }
 
-    if (closeBtn) closeBtn.onclick = closeModal;
+    if (closeBtn) {
+      closeBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      };
+    }
     if (modal) {
       modal.onclick = (e) => {
-        if (e.target === modal) closeModal();
+        if (e.target === modal) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeModal();
+        }
       };
     }
 
     if (shareBtn) {
-      shareBtn.onclick = () => {
+      shareBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const url = window.location.origin + window.location.pathname + '#forum-' + activeThreadTopicId;
         if (navigator.clipboard) {
           navigator.clipboard.writeText(url);
@@ -453,7 +364,9 @@
     }
 
     if (saveBtn) {
-      saveBtn.onclick = () => {
+      saveBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         saveBtn.innerHTML = `<i class="ph ph-bookmark-simple-fill" style="color: #fbbf24;"></i> Saved!`;
         setTimeout(() => {
           saveBtn.innerHTML = `<i class="ph ph-bookmark-simple"></i> Save`;
@@ -462,28 +375,35 @@
     }
 
     if (upvoteBtn) {
-      upvoteBtn.onclick = () => {
+      upvoteBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (!activeThreadTopicId) return;
-        const topics = getTopicsList();
-        const topic = topics.find(t => t.id === activeThreadTopicId);
-        if (topic) {
-          topic.upvotes = (topic.upvotes || 0) + 1;
-          const upvotesCount = document.getElementById('threadUpvoteCount');
-          if (upvotesCount) upvotesCount.textContent = topic.upvotes;
-          renderForums();
-        }
-      };
-    }
 
-    if (downvoteBtn) {
-      downvoteBtn.onclick = () => {
-        if (!activeThreadTopicId) return;
+        let storedVotes = {};
+        try { storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {}; } catch(err) {}
+
         const topics = getTopicsList();
-        const topic = topics.find(t => t.id === activeThreadTopicId);
-        if (topic && topic.upvotes > 0) {
-          topic.upvotes = topic.upvotes - 1;
+        const topic = topics.find(t => String(t.id) === String(activeThreadTopicId));
+        if (topic) {
+          const currentVote = storedVotes[topic.id] || 0;
+          const newVote = currentVote === 1 ? 0 : 1;
+          storedVotes[topic.id] = newVote;
+          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
+
           const upvotesCount = document.getElementById('threadUpvoteCount');
-          if (upvotesCount) upvotesCount.textContent = topic.upvotes;
+          if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + newVote;
+
+          if (newVote === 1) {
+            upvoteBtn.style.background = 'linear-gradient(135deg, #a855f7, #7e22ce)';
+            upvoteBtn.style.color = '#ffffff';
+            upvoteBtn.style.borderColor = '#a855f7';
+          } else {
+            upvoteBtn.style.background = 'rgba(168, 85, 247, 0.15)';
+            upvoteBtn.style.color = '#a855f7';
+            upvoteBtn.style.borderColor = 'rgba(168, 85, 247, 0.35)';
+          }
+
           renderForums();
         }
       };
@@ -558,6 +478,7 @@
     if (submitReplyBtn) {
       submitReplyBtn.onclick = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         submitCommentOptimistically();
       };
     }
@@ -566,6 +487,7 @@
       replyInput.onkeydown = (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
           e.preventDefault();
+          e.stopPropagation();
           submitCommentOptimistically();
         }
       };
@@ -586,17 +508,24 @@
     function openModal() { if (modal) modal.style.display = 'flex'; }
     function closeModal() { if (modal) modal.style.display = 'none'; }
 
-    if (openBtn) openBtn.onclick = openModal;
-    if (closeBtn) closeBtn.onclick = closeModal;
-    if (cancelBtn) cancelBtn.onclick = closeModal;
+    if (openBtn) openBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openModal(); };
+    if (closeBtn) closeBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeModal(); };
+    if (cancelBtn) cancelBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); closeModal(); };
     if (modal) {
       modal.onclick = (e) => {
-        if (e.target === modal) closeModal();
+        if (e.target === modal) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeModal();
+        }
       };
     }
 
     if (publishBtn) {
-      publishBtn.onclick = async () => {
+      publishBtn.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         const title = titleInput ? titleInput.value.trim() : '';
         const category = categorySelect ? categorySelect.value : 'Metaphysical Debate';
         const body = bodyInput ? bodyInput.value.trim() : '';
@@ -630,18 +559,16 @@
         const topics = getTopicsList();
         topics.unshift(newTopic);
 
-        // Store local topics in localStorage
+        // Save new topic permanently to localStorage
         try {
-          const localTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
-          localTopics.unshift(newTopic);
-          localStorage.setItem('metawiki_local_forum_topics', JSON.stringify(localTopics));
-        } catch(e) {}
+          localStorage.setItem('metawiki_local_forum_topics', JSON.stringify(topics));
+        } catch(err) {}
 
         // Async sync with Supabase Forum Service
         if (window.METAWIKI_FORUM_SERVICE) {
           try {
             window.METAWIKI_FORUM_SERVICE.createPost(title, category, body).catch(() => {});
-          } catch(e) {}
+          } catch(err) {}
         }
 
         if (titleInput) titleInput.value = '';
@@ -662,7 +589,9 @@
 
     if (bubbleBar) {
       bubbleBar.querySelectorAll('.category-bubble-pill').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           bubbleBar.querySelectorAll('.category-bubble-pill').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
 
@@ -676,7 +605,9 @@
     }
 
     if (showMoreBtn) {
-      showMoreBtn.onclick = () => {
+      showMoreBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (!window.state) window.state = {};
         window.state.forumVisibleCount = (window.state.forumVisibleCount || 15) + 15;
         renderForums();
@@ -719,44 +650,50 @@
       const userVote = storedVotes[t.id] || 0;
       const netScore = (t.upvotes || 0) + userVote;
       const upvotedClass = userVote === 1 ? 'upvoted' : '';
-      const downvotedClass = userVote === -1 ? 'downvoted' : '';
 
       return `
-        <div class="forum-topic-card" data-id="${t.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s; cursor: pointer; margin-bottom: 1.2rem; background: rgba(22, 17, 46, 0.7); border: 1px solid var(--mw-border); border-radius: 12px; padding: 1.2rem; display: flex; gap: 1.2rem;">
-          <div class="forum-vote-column" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 40px; background: rgba(0,0,0,0.25); padding: 0.4rem; border-radius: 8px;">
-            <button class="vote-btn vote-up ${upvotedClass}" data-id="${t.id}" title="Upvote Topic" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem;">
-              <i class="ph ph-caret-up-bold"></i>
-            </button>
-            <span class="forum-net-score ${upvotedClass} ${downvotedClass}" style="font-weight: 800; font-size: 0.95rem; color: #fbbf24; margin: 0.2rem 0;">${netScore}</span>
-            <button class="vote-btn vote-down ${downvotedClass}" data-id="${t.id}" title="Downvote Topic" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem;">
-              <i class="ph ph-caret-down-bold"></i>
-            </button>
+        <div class="forum-topic-card" data-id="${t.id}" style="animation: fadeIn 0.4s ease forwards; animation-delay: ${(idx % 15) * 0.03}s; cursor: pointer; margin-bottom: 1.2rem; background: rgba(22, 17, 46, 0.7); border: 1px solid var(--mw-border); border-radius: 12px; padding: 1.3rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          
+          <!-- TOPIC CATEGORY & TIME -->
+          <div class="forum-topic-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="forum-category-pill" style="font-size: 0.76rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.25rem 0.7rem; border-radius: 20px;">${cleanCategoryName(t.category)}</span>
+            <span style="font-size: 0.78rem; color: var(--mw-text-muted);">${t.timestamp || t.time || 'Recently'}</span>
           </div>
 
-          <div style="flex: 1;">
-            <div class="forum-topic-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span class="forum-category-pill" style="font-size: 0.76rem; font-weight: 800; color: #a855f7; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); padding: 0.2rem 0.65rem; border-radius: 20px;">${cleanCategoryName(t.category)}</span>
-              <span style="font-size: 0.78rem; color: var(--mw-text-muted);">${t.timestamp || t.time || 'Recently'}</span>
+          <!-- TOPIC TITLE & BODY -->
+          <div class="forum-topic-title" style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #ffffff; margin: 0.1rem 0;">${t.title}</div>
+          <div class="forum-topic-body" style="font-size: 0.9rem; color: var(--mw-text-muted); line-height: 1.55; margin-bottom: 0.4rem;">${t.body}</div>
+
+          <!-- TOPIC FOOTER: AUTHOR & SINGLE REDDIT-STYLE UPVOTE BUTTON -->
+          <div class="forum-topic-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06);">
+            
+            <div class="forum-topic-author" style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="${t.avatar || 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.25);" alt="Avatar">
+              <span style="font-weight: 700; color: #f2f3f5; font-size: 0.86rem;">@${cleanUsername(t.author)}</span>
             </div>
-            <div class="forum-topic-title" style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.4rem;">${t.title}</div>
-            <div class="forum-topic-body" style="font-size: 0.9rem; color: var(--mw-text-muted); line-height: 1.5; margin-bottom: 0.8rem;">${t.body}</div>
-            <div class="forum-topic-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.6rem;">
-              <div class="forum-topic-author" style="display: flex; align-items: center; gap: 0.45rem;">
-                <img src="${t.avatar || 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256'}" style="width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.25);" alt="Avatar">
-                <span style="font-weight: 700; color: #f2f3f5; font-size: 0.84rem;">@${cleanUsername(t.author)}</span>
-              </div>
-              <div style="display: flex; gap: 1rem; color: var(--mw-gold); font-weight: bold; font-size: 0.85rem;">
-                <span>💬 ${t.repliesCount || (t.repliesList ? t.repliesList.length : 0)} replies</span>
-              </div>
+
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <!-- SINGLE REDDIT-STYLE UPVOTE PILL -->
+              <button class="vote-btn vote-up ${upvotedClass}" data-id="${t.id}" title="Upvote Topic" style="background: ${userVote === 1 ? 'linear-gradient(135deg, #a855f7, #7e22ce)' : 'rgba(168, 85, 247, 0.15)'}; border: 1px solid ${userVote === 1 ? '#a855f7' : 'rgba(168, 85, 247, 0.35)'}; color: ${userVote === 1 ? '#ffffff' : '#a855f7'}; padding: 0.35rem 0.85rem; border-radius: 20px; font-weight: 800; font-size: 0.82rem; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; transition: all 0.2s ease;">
+                <i class="ph ph-arrow-fat-up-fill" style="font-size: 0.95rem;"></i>
+                <span class="forum-net-score">${netScore}</span>
+              </button>
+
+              <span style="color: var(--mw-gold); font-weight: bold; font-size: 0.84rem; display: flex; align-items: center; gap: 0.35rem;">
+                <i class="ph ph-chat-teardrop-dots" style="color: #a855f7;"></i> ${t.repliesCount || (t.repliesList ? t.repliesList.length : 0)} replies
+              </span>
             </div>
+
           </div>
+
         </div>
       `;
     }).join('');
 
-    // Vote button handlers
+    // Upvote button handlers
     list.querySelectorAll('.vote-up').forEach(btn => {
       btn.onclick = (e) => {
+        e.preventDefault();
         e.stopPropagation();
         const topicId = btn.getAttribute('data-id');
         const topic = getTopicsList().find(t => String(t.id) === String(topicId));
@@ -769,24 +706,11 @@
       };
     });
 
-    list.querySelectorAll('.vote-down').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const topicId = btn.getAttribute('data-id');
-        const topic = getTopicsList().find(t => String(t.id) === String(topicId));
-        if (topic) {
-          const currentVote = storedVotes[topicId] || 0;
-          storedVotes[topicId] = currentVote === -1 ? 0 : -1;
-          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
-          renderForums();
-        }
-      };
-    });
-
     // Card click event -> open thread modal
     list.querySelectorAll('.forum-topic-card').forEach(card => {
       card.onclick = (e) => {
         if (e.target.closest('.vote-btn')) return;
+        e.preventDefault();
         const topicId = card.getAttribute('data-id');
         openForumThreadModal(topicId);
       };

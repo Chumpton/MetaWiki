@@ -1,7 +1,8 @@
 /**
  * MetaWiki - Metaphysical Community Forums Engine
- * Single Reddit-style upvote arrow, 1 official Campton test post, clean categories & handles,
- * sleek comment box, optimistic front-end posting, and persistent backend API routes.
+ * Integrates with Segmented Forum Data Store (window.METAWIKI_FORUM_STORE).
+ * Single Reddit-style upvote arrow pill, 1 official test post from Campton,
+ * clean categories & handles, sleek comment box, optimistic posting, and persistent backend API routes.
  */
 
 (function(window) {
@@ -16,46 +17,16 @@
     };
   }
 
-  // 1 Single Official Test Post from Campton in the backend
-  const OFFICIAL_CAMPTON_TEST_POST = {
-    id: 'topic-campton-official',
-    title: 'Welcome to MetaWiki Community — Consciousness & Hermetic Contemplations',
-    category: 'Metaphysical Debate',
-    author: 'Campton',
-    avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-    handle: '@campton',
-    body: 'Welcome to the official MetaWiki community forums! Here we explore non-dual perception, Dr. David R. Hawkins\' consciousness calibrations, Hermetic mechanics, and perennial philosophy. Feel free to start a discussion or leave a reply.',
-    repliesCount: 1,
-    upvotes: 42,
-    timestamp: 'Just now',
-    repliesList: [
-      {
-        id: 'reply-init-1',
-        author: 'Campton',
-        avatar: 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256',
-        body: 'All posts, replies, and upvotes are linked directly to your authenticated user profile.',
-        time: 'Just now'
-      }
-    ]
-  };
-
-  const DEFAULT_AUTHENTIC_TOPICS = [
-    OFFICIAL_CAMPTON_TEST_POST
-  ];
-
-  function getTopicsList() {
-    if (!window.METAWIKI_DATA) window.METAWIKI_DATA = {};
-
-    if (!window.METAWIKI_DATA.forumTopics || window.METAWIKI_DATA.forumTopics.length === 0) {
-      let storedTopics = [];
-      try {
-        storedTopics = JSON.parse(localStorage.getItem('metawiki_local_forum_topics')) || [];
-      } catch(e) {}
-
-      window.METAWIKI_DATA.forumTopics = storedTopics.length > 0 ? storedTopics : [...DEFAULT_AUTHENTIC_TOPICS];
-    }
-
-    return window.METAWIKI_DATA.forumTopics;
+  function getStore() {
+    return window.METAWIKI_FORUM_STORE || {
+      getPosts: () => [],
+      getPostById: () => null,
+      addPost: () => null,
+      getComments: () => [],
+      addComment: () => null,
+      toggleVote: () => 0,
+      getVoteStatus: () => 0
+    };
   }
 
   function cleanCategoryName(cat) {
@@ -217,10 +188,10 @@
   async function openForumThreadModal(topicId) {
     ensureForumModalsExist();
 
-    const topics = getTopicsList();
-    let topic = topics.find(t => String(t.id) === String(topicId));
+    const store = getStore();
+    let topic = store.getPostById(topicId);
     if (!topic) {
-      topic = topics[0];
+      topic = store.getPosts()[0];
     }
     if (!topic) return;
 
@@ -252,9 +223,7 @@
     if (authorName) authorName.textContent = `@${cleanUsername(topic.author)}`;
     if (body) body.textContent = topic.body;
 
-    let storedVotes = {};
-    try { storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {}; } catch(e) {}
-    const userVote = storedVotes[topic.id] || 0;
+    const userVote = store.getVoteStatus(topic.id);
     if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + userVote;
     if (upvoteBtn) {
       if (userVote === 1) {
@@ -266,24 +235,6 @@
         upvoteBtn.style.color = '#a855f7';
         upvoteBtn.style.borderColor = 'rgba(168, 85, 247, 0.35)';
       }
-    }
-
-    // Load locally saved replies from localStorage if any
-    try {
-      const localCommentsMap = JSON.parse(localStorage.getItem('metawiki_local_comments')) || {};
-      if (localCommentsMap[topic.id] && localCommentsMap[topic.id].length > 0) {
-        topic.repliesList = localCommentsMap[topic.id];
-      }
-    } catch(e) {}
-
-    // Fetch live replies from Supabase backend if available
-    if (window.METAWIKI_FORUM_SERVICE) {
-      try {
-        const supaComments = await window.METAWIKI_FORUM_SERVICE.fetchComments(topic.id);
-        if (supaComments && supaComments.length > 0) {
-          topic.repliesList = supaComments;
-        }
-      } catch (e) {}
     }
 
     renderThreadReplies(topic);
@@ -380,17 +331,11 @@
         e.stopPropagation();
         if (!activeThreadTopicId) return;
 
-        let storedVotes = {};
-        try { storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {}; } catch(err) {}
+        const store = getStore();
+        const newVote = store.toggleVote(activeThreadTopicId);
+        const topic = store.getPostById(activeThreadTopicId);
 
-        const topics = getTopicsList();
-        const topic = topics.find(t => String(t.id) === String(activeThreadTopicId));
         if (topic) {
-          const currentVote = storedVotes[topic.id] || 0;
-          const newVote = currentVote === 1 ? 0 : 1;
-          storedVotes[topic.id] = newVote;
-          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
-
           const upvotesCount = document.getElementById('threadUpvoteCount');
           if (upvotesCount) upvotesCount.textContent = (topic.upvotes || 1) + newVote;
 
@@ -409,7 +354,7 @@
       };
     }
 
-    // Optimistic Comment Submission Engine
+    // Optimistic Comment Submission Engine via Forum Store
     async function submitCommentOptimistically() {
       if (!replyInput || !activeThreadTopicId) return;
 
@@ -421,57 +366,25 @@
         return;
       }
 
-      const topics = getTopicsList();
-      const topic = topics.find(t => String(t.id) === String(activeThreadTopicId));
-      if (!topic) return;
+      const store = getStore();
+      const newComment = store.addComment(activeThreadTopicId, text);
+      const topic = store.getPostById(activeThreadTopicId);
 
-      const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
-      const authorName = session ? session.username : 'Campton';
-      const authorAvatar = session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
+      if (newComment && topic) {
+        replyInput.value = '';
+        renderThreadReplies(topic);
+        renderForums();
 
-      const newComment = {
-        id: 'reply-' + Date.now(),
-        author: authorName,
-        avatar: authorAvatar,
-        handle: `@${cleanUsername(authorName)}`,
-        body: text,
-        time: 'Just now'
-      };
+        const statusMsg = document.getElementById('commentStatusMsg');
+        if (statusMsg) {
+          statusMsg.style.opacity = '1';
+          setTimeout(() => { statusMsg.style.opacity = '0'; }, 2200);
+        }
 
-      // 1. INSTANT OPTIMISTIC FRONT-END UPDATE
-      topic.repliesList = topic.repliesList || [];
-      topic.repliesList.push(newComment);
-      topic.repliesCount = topic.repliesList.length;
-
-      replyInput.value = '';
-      renderThreadReplies(topic);
-      renderForums();
-
-      // Show temporary success feedback
-      const statusMsg = document.getElementById('commentStatusMsg');
-      if (statusMsg) {
-        statusMsg.style.opacity = '1';
-        setTimeout(() => { statusMsg.style.opacity = '0'; }, 2200);
-      }
-
-      // Smooth scroll to newly added comment
-      const container = document.getElementById('threadRepliesContainer');
-      if (container && container.lastElementChild) {
-        container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      // 2. BACKEND PERSISTENCE & ASYNC API SYNC
-      try {
-        let localComments = {};
-        try { localComments = JSON.parse(localStorage.getItem('metawiki_local_comments')) || {}; } catch(e){}
-        localComments[topic.id] = topic.repliesList;
-        localStorage.setItem('metawiki_local_comments', JSON.stringify(localComments));
-      } catch(e){}
-
-      if (window.METAWIKI_FORUM_SERVICE) {
-        try {
-          window.METAWIKI_FORUM_SERVICE.createComment(topic.id, text).catch(() => {});
-        } catch (e) {}
+        const container = document.getElementById('threadRepliesContainer');
+        if (container && container.lastElementChild) {
+          container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
     }
 
@@ -538,38 +451,8 @@
         publishBtn.disabled = true;
         publishBtn.innerHTML = `<i class="ph ph-spinner spinner" style="animation: spin 1s linear infinite;"></i> Publishing...`;
 
-        const session = window.METAWIKI_AUTH ? window.METAWIKI_AUTH.getSession() : null;
-        const authorName = session ? session.username : 'Campton';
-        const authorAvatar = session ? session.avatar : 'https://cdn.discordapp.com/avatars/400161052383379457/caf6e3529ab582bb5ff31fe9cb0ce5ee.png?size=256';
-
-        const newTopic = {
-          id: 'topic-' + Date.now(),
-          title: title,
-          category: cleanCategoryName(category),
-          author: authorName,
-          avatar: authorAvatar,
-          handle: `@${cleanUsername(authorName)}`,
-          body: body,
-          repliesCount: 0,
-          upvotes: 1,
-          timestamp: 'Just now',
-          repliesList: []
-        };
-
-        const topics = getTopicsList();
-        topics.unshift(newTopic);
-
-        // Save new topic permanently to localStorage
-        try {
-          localStorage.setItem('metawiki_local_forum_topics', JSON.stringify(topics));
-        } catch(err) {}
-
-        // Async sync with Supabase Forum Service
-        if (window.METAWIKI_FORUM_SERVICE) {
-          try {
-            window.METAWIKI_FORUM_SERVICE.createPost(title, category, body).catch(() => {});
-          } catch(err) {}
-        }
+        const store = getStore();
+        store.addPost(title, category, body);
 
         if (titleInput) titleInput.value = '';
         if (bodyInput) bodyInput.value = '';
@@ -621,12 +504,8 @@
     const list = document.getElementById('forumTopicsList');
     if (!list) return;
 
-    let storedVotes = {};
-    try {
-      storedVotes = JSON.parse(localStorage.getItem('metawiki_forum_votes')) || {};
-    } catch(e) {}
-
-    const allTopics = getTopicsList();
+    const store = getStore();
+    const allTopics = store.getPosts();
     const category = (window.state && window.state.forumCategory) || 'all';
     const countToDisplay = (window.state && window.state.forumVisibleCount) || 15;
 
@@ -647,7 +526,7 @@
     const visibleItems = filtered.slice(0, countToDisplay);
 
     list.innerHTML = visibleItems.map((t, idx) => {
-      const userVote = storedVotes[t.id] || 0;
+      const userVote = store.getVoteStatus(t.id);
       const netScore = (t.upvotes || 0) + userVote;
       const upvotedClass = userVote === 1 ? 'upvoted' : '';
 
@@ -696,13 +575,8 @@
         e.preventDefault();
         e.stopPropagation();
         const topicId = btn.getAttribute('data-id');
-        const topic = getTopicsList().find(t => String(t.id) === String(topicId));
-        if (topic) {
-          const currentVote = storedVotes[topicId] || 0;
-          storedVotes[topicId] = currentVote === 1 ? 0 : 1;
-          localStorage.setItem('metawiki_forum_votes', JSON.stringify(storedVotes));
-          renderForums();
-        }
+        store.toggleVote(topicId);
+        renderForums();
       };
     });
 
@@ -718,7 +592,6 @@
   }
 
   async function initForums() {
-    getTopicsList();
     ensureForumModalsExist();
     setupForumCategoryBubbleFeed();
     renderForums();

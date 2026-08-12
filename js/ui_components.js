@@ -535,8 +535,14 @@
     const btnCloseFullscreen = document.getElementById('closeDimensionFullscreenBtn');
 
     if (wrapper) {
-      wrapper.addEventListener('mouseenter', () => { if (window.state) window.state.isHoverPaused = true; });
-      wrapper.addEventListener('mouseleave', () => { if (window.state) window.state.isHoverPaused = false; });
+      wrapper.addEventListener('mouseenter', () => {
+        if (!window.state) window.state = {};
+        window.state.isHoverPaused = true;
+      });
+      wrapper.addEventListener('mouseleave', () => {
+        if (!window.state) window.state = {};
+        window.state.isHoverPaused = false;
+      });
     }
 
     if (btnFullscreen && fullscreenModal) {
@@ -545,10 +551,10 @@
         document.body.style.overflow = 'hidden';
         setTimeout(() => {
           window.dispatchEvent(new Event('resize'));
-          const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
+          const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver') || document.querySelector('#cnscns-widget-fullscreen #scroll-container');
           if (fsDriver) {
-            const fsSnaps = fsDriver.querySelectorAll('.snap-section');
-            if (fsSnaps.length > 1) fsDriver.scrollTop = fsSnaps[1].offsetTop;
+            fsDriver.scrollTop = fsDriver.clientHeight || 400;
+            fsDriver.dispatchEvent(new Event('scroll'));
           }
         }, 60);
       });
@@ -561,80 +567,65 @@
       });
     }
 
-    let currentSlideIndex = 1;
-
-    const attemptInfinityLock = () => {
-      let locked = false;
-      const miniDriver = document.querySelector('#cnscns-widget .scroll-driver') || document.querySelector('#dimensionMiniWrapper .scroll-driver');
-      if (miniDriver) {
-        const snaps = miniDriver.querySelectorAll('.snap-section');
-        if (snaps.length > 1 && snaps[1].offsetTop > 0) {
-          miniDriver.scrollTop = snaps[1].offsetTop;
-          locked = true;
-        }
+    function getActiveDriver() {
+      if (fullscreenModal && fullscreenModal.style.display === 'block') {
+        return document.querySelector('#cnscns-widget-fullscreen .scroll-driver') || document.querySelector('#cnscns-widget-fullscreen #scroll-container');
       }
-      const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
-      if (fsDriver) {
-        const fsSnaps = fsDriver.querySelectorAll('.snap-section');
-        if (fsSnaps.length > 1 && fsSnaps[1].offsetTop > 0) {
-          fsDriver.scrollTop = fsSnaps[1].offsetTop;
-        }
-      }
-      return locked;
-    };
+      return document.querySelector('#cnscns-widget .scroll-driver') || document.querySelector('#cnscns-widget #scroll-container') || document.querySelector('#dimensionMiniWrapper .scroll-driver');
+    }
 
-    // Poll until React renders .snap-section elements and locks onto Infinity slide
-    const lockPoll = setInterval(() => {
-      if (attemptInfinityLock()) {
-        clearInterval(lockPoll);
-      }
-    }, 40);
+    let currentStage = 1;
 
-    setTimeout(attemptInfinityLock, 100);
-    setTimeout(attemptInfinityLock, 350);
-    setTimeout(attemptInfinityLock, 800);
-    setTimeout(attemptInfinityLock, 1500);
+    // Fast initial lock onto stage 1 once mounted
+    let mountAttempts = 0;
+    const mountLockInterval = setInterval(() => {
+      mountAttempts++;
+      const driver = getActiveDriver();
+      if (driver && driver.scrollHeight > driver.clientHeight) {
+        const snaps = driver.querySelectorAll('.snap-section');
+        const totalStages = snaps.length > 1 ? snaps.length - 1 : 34;
+        const maxScroll = driver.scrollHeight - driver.clientHeight;
+        const stageHeight = maxScroll / totalStages;
+        driver.scrollTop = Math.round(stageHeight);
+        driver.dispatchEvent(new Event('scroll'));
+        clearInterval(mountLockInterval);
+      } else if (mountAttempts > 50) {
+        clearInterval(mountLockInterval);
+      }
+    }, 150);
 
     if (dimensionStepTimer) clearInterval(dimensionStepTimer);
 
-    // Clean Synchronized 7-Second Slide Pacing
+    // Continuous 5-Second Stage Auto-Play Engine
     dimensionStepTimer = setInterval(() => {
-      if (window.state && window.state.isHoverPaused) return; // Pause on hover!
-      const miniDriver = document.querySelector('#cnscns-widget .scroll-driver') || document.querySelector('#dimensionMiniWrapper .scroll-driver');
-      const fsDriver = document.querySelector('#cnscns-widget-fullscreen .scroll-driver');
-      const activeDriver = (fullscreenModal && fullscreenModal.style.display === 'block' && fsDriver) ? fsDriver : miniDriver;
+      if (window.state && window.state.isHoverPaused) return;
 
-      if (activeDriver) {
-        const snapSections = activeDriver.querySelectorAll('.snap-section');
-        if (snapSections.length > 1) {
-          const currentScrollTop = activeDriver.scrollTop;
-          let detectedIndex = 1;
-          let minDiff = Infinity;
+      const driver = getActiveDriver();
+      if (!driver) return;
 
-          snapSections.forEach((sec, idx) => {
-            if (idx < 1) return;
-            const diff = Math.abs(sec.offsetTop - currentScrollTop);
-            if (diff < minDiff) {
-              minDiff = diff;
-              detectedIndex = idx;
-            }
-          });
+      const snaps = driver.querySelectorAll('.snap-section');
+      const totalStages = snaps.length > 1 ? snaps.length - 1 : 34;
+      const maxScroll = driver.scrollHeight - driver.clientHeight;
 
-          currentSlideIndex = detectedIndex + 1;
-          if (currentSlideIndex >= snapSections.length) {
-            currentSlideIndex = 1; // Loop back to slide 1
-          }
+      if (maxScroll <= 0) return;
 
-          const targetSnap = snapSections[currentSlideIndex];
-          if (targetSnap) {
-            activeDriver.scrollTo({
-              top: targetSnap.offsetTop,
-              behavior: 'smooth'
-            });
-          }
-        }
+      const stageHeight = maxScroll / totalStages;
+      
+      currentStage++;
+      if (currentStage > totalStages) {
+        currentStage = 1;
       }
-    }, 7000);
+
+      const targetScrollTop = Math.round(currentStage * stageHeight);
+      
+      driver.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+
+      // Dispatch scroll event so React canvas updates 3D scene animation
+      driver.dispatchEvent(new Event('scroll'));
+    }, 5000);
   }
 
   function setupScrollHideHeader() {

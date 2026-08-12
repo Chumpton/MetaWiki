@@ -160,4 +160,11 @@
 
   window.initMemberProfileModal = initMemberProfileModal;
 
+  window.openMemberProfileModal = function () {
+    initMemberProfileModal();
+    if (typeof window.openMemberProfileModal === 'function') {
+      window.openMemberProfileModal();
+    }
+  };
+
 })(window);

@@ -84,10 +84,11 @@
         e.preventDefault();
         const session = window.METAWIKI_DISCORD_BACKEND.getSession();
         if (session) {
+          if (typeof window.initMemberProfileModal === 'function') {
+            window.initMemberProfileModal();
+          }
           if (typeof window.openMemberProfileModal === 'function') {
             window.openMemberProfileModal();
-          } else {
-            window.METAWIKI_DISCORD_BACKEND.logout();
           }
         } else {
           window.METAWIKI_DISCORD_BACKEND.openModal();
